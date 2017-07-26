@@ -1,5 +1,2 @@
-Coefficient;Interaction
--2;A,B
-4;B
-110;A
-50;C
+root;log10(MaxTenuringThreshold);NewRatio;NewRatio,UseAdaptiveSizePolicy;NewRatio,UseAdaptiveSizePolicy,NewRatio;NewRatio,log10(NewRatio);UseAdaptiveSizePolicy;DisableExplicitGC;NewRatio,log10(NewRatio),log10( MaxTenuringThreshold);NewRatio,UseAdaptiveSizePolicy,NewRatio,log10(SurvivorRatio)
+6.77;10.33;6.8;9.35;0;-1.64;-2.26;0;-2.79;0
