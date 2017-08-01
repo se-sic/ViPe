@@ -1,5 +1,6 @@
 library(ggplot2)
-library(ggradar)
+#library(ggradar)
+source("/localhome/Repositories/ViPe/R-Scripts/ggradar.R")
 suppressPackageStartupMessages(library(dplyr))
 library(scales)
 
@@ -18,8 +19,11 @@ for (i in 1:length(csvFiles)) {
   name <- strsplit(file, "\\.")[[1]][1];
   
   # Add the performance models
-  performanceModel <- read.csv(file, header=TRUE, sep=";");
-  performanceModel <- cbind(rep(name, nrow(performanceModel)), performanceModel);
+  performanceModel <- read.csv(file, header=TRUE, sep=";", check.names = FALSE);
+  
+  # Replace the feature interactions by numbers
+  #performanceModel <- cbind(rep(name, nrow(performanceModel)), performanceModel);
+  
   # Adjust the name of the column
   colnames(performanceModel)[1] <- "Group"
   if (i == 1) {
@@ -30,9 +34,9 @@ for (i in 1:length(csvFiles)) {
 }
 
 # Find the maximum and minimum value
-maximumValue <- max(performanceModels[-1])
-minimumValue <- min(performanceModels[-1])
+maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
+minimumValue <- -maximumValue;
 
-performanceModels[-1] <- (performanceModels[-1] - minimumValue)  / (maximumValue - minimumValue)
+performanceModels[-1] <- performanceModels[-1]  / maximumValue
 browser();
-ggradar(performanceModels, axis.labels = seq(1, ncol(performanceModels) - 1), font.radar = "mono", legend.title = "Performance Models")
+ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("-", "0%", "+"), grid.min = -1, grid.mid = 0, grid.max = 1)
