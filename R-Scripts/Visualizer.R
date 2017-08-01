@@ -1,6 +1,7 @@
 library(ggplot2)
 #library(ggradar)
 source("/localhome/Repositories/ViPe/R-Scripts/ggradar.R")
+source("/localhome/Repositories/ViPe/R-Scripts/ggtext.R")
 suppressPackageStartupMessages(library(dplyr))
 library(scales)
 
@@ -39,4 +40,5 @@ minimumValue <- -maximumValue;
 
 performanceModels[-1] <- performanceModels[-1]  / maximumValue
 browser();
-ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("-", "0%", "+"), grid.min = -1, grid.mid = 0, grid.max = 1)
+ggtext(performanceModels)
+#ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("-", "0%", "+"), grid.min = -1, grid.mid = 0, grid.max = 1)
