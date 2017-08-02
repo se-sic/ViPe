@@ -5,7 +5,7 @@
 ggtext <- function(plot.data,
                    text.font = "Circular Air Light",
                    text.colour = "black",
-                   text.size = 4,
+                   text.relativeSize = 0.8,
                    curve.colour = "blue") 
 {
   # PREPARATION
@@ -59,14 +59,14 @@ ggtext <- function(plot.data,
     return(allTerms);
   }
   
-  ComputeTextSizes <- function(allTerms, text.font) {
+  ComputeTextSizes <- function(allTerms, text.font, text.relativeSize) {
     result <- c();
     for (j in 1:length(allTerms[[1]][[1]])) {
       for (i in 1:length(allTerms)) {
        if (allTerms[[i]][[1]][j] != "")  {
          specs <- NULL;
-         specs$width <- strwidth(allTerms[[i]][[1]][j], "inches", family=text.font);
-         specs$height <- strheight(allTerms[[i]][[1]][j], "inches", family=text.font) / 4;
+         specs$width <- strwidth(allTerms[[i]][[1]][j], cex=text.relativeSize, family=text.font) + 0.01;
+         specs$height <- strheight(allTerms[[i]][[1]][j], cex=text.relativeSize, family=text.font);
          result <- c(result, list(specs));
          break;
        }
@@ -95,16 +95,16 @@ ggtext <- function(plot.data,
         currentOffset$x <- currentOffset$x + textSizes[[j]]$width;
         positions$y <- c(positions$y, currentOffset$y);
       }
-      currentOffset$y <- currentOffset$y - maxHeight;
+      currentOffset$y <- currentOffset$y + maxHeight + distanceBetweenText;
       result <- c(result, list(positions));
     }
     
     return(result);
   }
   
-  ComputeTextCoordinates <- function(allTerms, distanceBetweenText, text.font) {
+  ComputeTextCoordinates <- function(allTerms, distanceBetweenText, text.font, text.relativeSize) {
     # Retrieve the text sizes
-    textSizes <- ComputeTextSizes(allTerms, text.font);
+    textSizes <- ComputeTextSizes(allTerms, text.font, text.relativeSize);
     # Compute the positions of the terms
     positions <- ComputePosition(allTerms, distanceBetweenText, textSizes);
 
@@ -116,12 +116,17 @@ ggtext <- function(plot.data,
     return(allTerms);
   }
   
+  #windows.options(width=15, height=0.5)
+  #pdf("TextTest.pdf", height=2, width=4);
+  windows(record=TRUE, width=20, height=10)
+  plot.new();
+  
   # CONVERSION OF THE DATA (if needed)
   allTerms <- NULL;
   allTerms <- ComputeStrings(plot.data);
   
   # Calculating the positions of the strings
-  allTerms <- ComputeTextCoordinates(allTerms, 1, text.font);
+  allTerms <- ComputeTextCoordinates(allTerms, 0.8, text.font, text.relativeSize);
 
   # PLOTING
   
@@ -138,16 +143,25 @@ ggtext <- function(plot.data,
   
   theme_clear <- theme_clear + theme(legend.position="none")
   
-  base <- ggplot() + xlab(NULL) + ylab(NULL) + theme_clear;
+  #base <- ggplot() + xlab(NULL) + ylab(NULL) + theme_clear;
   
   # Adding the text
   for (i in 1:length(allTerms)) {
     browser();
-    base <- base  + 
-      geom_text(data=as.data.frame(allTerms[[i]]),
-                aes(x=x,y=y,label=label), family=text.font, size=text.size)
+    for (j in 1:length(allTerms[[i]]$label)) {
+      tmpLabel <- allTerms[[i]]$label[j];
+      tmpX <- allTerms[[i]]$x[j];
+      tmpY <- allTerms[[i]]$y[j];
+      text(x = tmpX, y=tmpY, tmpLabel, adj = c(0,0), cex=text.relativeSize);
+    }
+    
+    browser();
+    plot();
+    #base <- base  + 
+    #  geom_text(data=as.data.frame(allTerms[[i]]),
+    #            aes(x=x,y=y,label=label), family=text.font, size=text.size)
   }
   
-  
-  return(base);
+  #dev.off();
+  #return(base);
 }

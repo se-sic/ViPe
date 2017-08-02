@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library(dplyr))
 library(scales)
 
 # The path to the working directory
-path <- "C:/Users/chris_000/Desktop/Uni/ViPe/Examples/"
+path <- "C:/cygwin64/home/Kalti/Repos/ViPe/Examples/"
 setwd(path);
 
 performanceModels <- NULL;
@@ -38,7 +38,8 @@ maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
 minimumValue <- -maximumValue;
 
 performanceModels[-1] <- performanceModels[-1]  / maximumValue
-source("C:/Users/chris_000/Desktop/Uni/ViPe/R-Scripts/ggtext.R")
-print(ggtext(performanceModels, text.font = "sans"))
-#source("C:/Users/chris_000/Desktop/Uni/ViPe/R-Scripts/ggradar.R")
+colnames(performanceModels) <- gsub("Â", "",colnames(performanceModels))
+source("C:/cygwin64/home/Kalti/Repos/ViPe/R-Scripts/ggtext.R")
+ggtext(performanceModels, text.font = "sans")
+#source("C:/cygwin64/home/Kalti/Repos/ViPe/R-Scripts/ggradar.R")
 #print(ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("-", "0%", "+"), grid.min = -1, grid.mid = 0, grid.max = 1))
