@@ -3,8 +3,9 @@
 #' @export ggtext
 
 ggtext <- function(plot.data,
-                   font = "Circular Air Light",
+                   text.font = "Circular Air Light",
                    text.colour = "black",
+                   text.size = 4,
                    curve.colour = "blue") 
 {
   # PREPARATION
@@ -58,14 +59,14 @@ ggtext <- function(plot.data,
     return(allTerms);
   }
   
-  ComputeTextSizes <- function(allTerms) {
+  ComputeTextSizes <- function(allTerms, text.font) {
     result <- c();
     for (j in 1:length(allTerms[[1]][[1]])) {
       for (i in 1:length(allTerms)) {
-       if (allTerms[[i]][j] != "")  {
+       if (allTerms[[i]][[1]][j] != "")  {
          specs <- NULL;
-         specs$width <- strwidth(allTerms[[i]][[1]][j], "inches");
-         specs$height <- strheight(allTerms[[i]][[1]][j], "inches");
+         specs$width <- strwidth(allTerms[[i]][[1]][j], "inches", family=text.font);
+         specs$height <- strheight(allTerms[[i]][[1]][j], "inches", family=text.font) / 4;
          result <- c(result, list(specs));
          break;
        }
@@ -75,11 +76,44 @@ ggtext <- function(plot.data,
     return(result);
   }
   
-  ComputeTextCoordinates <- function(allTerms, distanceBetweenText) {
+  ComputePosition <- function(allTerms, distanceBetweenText, textSizes) {
+    result <- c();
+    
+    # Find the maximum height
+    maxHeight <- 0;
+    for (i in 1:length(textSizes)) {
+      maxHeight <- max(maxHeight, textSizes[[i]]$height);
+    }
+    
+    currentOffset <- NULL;
+    currentOffset$y <- 0;
+    for (i in 1:length(allTerms)) {
+      currentOffset$x <- 0;
+      positions <- NULL;
+      for (j in 1:length(textSizes)) {
+        positions$x <- c(positions$x, currentOffset$x);
+        currentOffset$x <- currentOffset$x + textSizes[[j]]$width;
+        positions$y <- c(positions$y, currentOffset$y);
+      }
+      currentOffset$y <- currentOffset$y - maxHeight;
+      result <- c(result, list(positions));
+    }
+    
+    return(result);
+  }
+  
+  ComputeTextCoordinates <- function(allTerms, distanceBetweenText, text.font) {
     # Retrieve the text sizes
-    textSizes <- ComputeTextSizes(allTerms);
+    textSizes <- ComputeTextSizes(allTerms, text.font);
+    # Compute the positions of the terms
+    positions <- ComputePosition(allTerms, distanceBetweenText, textSizes);
+
+    for (i in 1:length(positions)) {
+      allTerms[[i]]$x <- positions[[i]]$x;
+      allTerms[[i]]$y <- positions[[i]]$y;
+    }
     
-    
+    return(allTerms);
   }
   
   # CONVERSION OF THE DATA (if needed)
@@ -87,15 +121,33 @@ ggtext <- function(plot.data,
   allTerms <- ComputeStrings(plot.data);
   
   # Calculating the positions of the strings
-  ComputeTextCoordinates(allTerms, 20);
+  allTerms <- ComputeTextCoordinates(allTerms, 1, text.font);
 
   # PLOTING
-  base <- ggplot();
+  
+  # Delcare 'theme_clear', with or without a plot legend as required by user
+  #[default = no legend if only 1 group [path] being plotted]
+  theme_clear <- theme_bw(base_size=20) + 
+    theme(axis.text.y=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          panel.border=element_blank(),
+          legend.key=element_rect(linetype="blank"))
+  
+  theme_clear <- theme_clear + theme(legend.position="none")
+  
+  base <- ggplot() + xlab(NULL) + ylab(NULL) + theme_clear;
   
   # Adding the text
-  base <- base #+ 
-    #geom_text(data=subset(axis$label,abs(axis$label$x)<=x.centre.range),
-    #                       aes(x=x,y=y,label=text),size=axis.label.size,hjust=0.5, family=font.radar)
+  for (i in 1:length(allTerms)) {
+    browser();
+    base <- base  + 
+      geom_text(data=as.data.frame(allTerms[[i]]),
+                aes(x=x,y=y,label=label), family=text.font, size=text.size)
+  }
   
   
+  return(base);
 }

@@ -4,7 +4,7 @@
 #' @export ggtext
 
 breakLine <- function(line, minimumLengthToSplit=15, doRecursiveCall=TRUE) {
-  #Breaks a line at the given minimum length if a certain symbol ('Â·') is parsed
+  #Breaks a line at the given minimum length if a certain symbol ('·') is parsed
   #Args:
   #   line: the line to split
   #   minimumLengthToSplit: the minimum length to split the line
@@ -14,7 +14,7 @@ breakLine <- function(line, minimumLengthToSplit=15, doRecursiveCall=TRUE) {
   found <- FALSE;
   while (i <= nchar(line) && !found) {
     character <- substring(line, i, i);
-    if (character == 'Â·') {
+    if (character == '·') {
       left <- substring(line,0,i-1);
       right <- breakLine(substring(line,i,nchar(line)), minimumLengthToSplit,FALSE);
       result <- paste(left, right, sep="\n");
@@ -34,12 +34,12 @@ breakLine <- function(line, minimumLengthToSplit=15, doRecursiveCall=TRUE) {
 }
 
 breakText <- function(text, minimumLengthToSplit=15) {
-  #Breaks the given text at the minimum length if a certain symbole ('Â·') is parsed
+  #Breaks the given text at the minimum length if a certain symbole ('·') is parsed
   #Args:
   #   text: the text to break
   #   minimumLengthToSplit: the minimum length for the text to split
   result <- c();
-  for (i in 1:length(axis.labels)) {
+  for (i in 1:length(text)) {
     stringLength <- nchar(text[i]);
     if (stringLength <= minimumLengthToSplit) {
       result <- c(result, text[i]);
