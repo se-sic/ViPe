@@ -76,24 +76,25 @@ ggtext <- function(plot.data,
     return(result);
   }
   
-  ComputePosition <- function(allTerms, distanceBetweenText, textSizes) {
+  ComputePosition <- function(allTerms, distanceBetweenText, textSizes, maxHeight) {
     result <- c();
-    
-    # Find the maximum height
-    maxHeight <- 0;
-    for (i in 1:length(textSizes)) {
-      maxHeight <- max(maxHeight, textSizes[[i]]$height);
-    }
     
     currentOffset <- NULL;
     currentOffset$y <- 0;
+
     for (i in 1:length(allTerms)) {
       currentOffset$x <- 0;
       positions <- NULL;
       for (j in 1:length(textSizes)) {
         positions$x <- c(positions$x, currentOffset$x);
         currentOffset$x <- currentOffset$x + textSizes[[j]]$width;
-        positions$y <- c(positions$y, currentOffset$y);
+        if (i == 1) {
+          positions$y <- c(positions$y, currentOffset$y + (maxHeight - textSizes[[j]]$height));
+        }
+        else {
+          positions$y <- c(positions$y, currentOffset$y);
+        }
+        
       }
       currentOffset$y <- currentOffset$y + maxHeight + distanceBetweenText;
       result <- c(result, list(positions));
@@ -102,11 +103,9 @@ ggtext <- function(plot.data,
     return(result);
   }
   
-  ComputeTextCoordinates <- function(allTerms, distanceBetweenText, text.font, text.relativeSize) {
-    # Retrieve the text sizes
-    textSizes <- ComputeTextSizes(allTerms, text.font, text.relativeSize);
+  ComputeTextCoordinates <- function(allTerms, distanceBetweenText, textSizes, maxHeight) {
     # Compute the positions of the terms
-    positions <- ComputePosition(allTerms, distanceBetweenText, textSizes);
+    positions <- ComputePosition(allTerms, distanceBetweenText, textSizes, maxHeight);
 
     for (i in 1:length(positions)) {
       allTerms[[i]]$x <- positions[[i]]$x;
@@ -116,23 +115,42 @@ ggtext <- function(plot.data,
     return(allTerms);
   }
   
+  ComputePointCoordinates <- function(coefficient, centerHeight, maxHeight, maxValue) {
+    # Compute the coordinates of the points
+     
+  }
+  
   #windows.options(width=15, height=0.5)
   #pdf("TextTest.pdf", height=2, width=4);
+  
   windows(record=TRUE, width=20, height=10)
   plot.new();
+  
+  distanceBetweenText <- 0.8;
   
   # CONVERSION OF THE DATA (if needed)
   allTerms <- NULL;
   allTerms <- ComputeStrings(plot.data);
   
+  # Compute the size of the textes
+  textSizes <- ComputeTextSizes(allTerms, text.font, text.relativeSize)
+  # Find the maximum height
+  maxHeight <- 0;
+  for (i in 1:length(textSizes)) {
+    maxHeight <- max(maxHeight, textSizes[[i]]$height);
+  }
+  
   # Calculating the positions of the strings
-  allTerms <- ComputeTextCoordinates(allTerms, 0.8, text.font, text.relativeSize);
+  allTerms <- ComputeTextCoordinates(allTerms, distanceBetweenText, textSizes, maxHeight);
+  
+  browser();
+  totalLength <- allTerms[[1]]$x[length(allTerms[[1]]$x)] + textSizes[[length(allTerms[[1]]$x)]]$width;
 
   # PLOTING
   
   # Delcare 'theme_clear', with or without a plot legend as required by user
   #[default = no legend if only 1 group [path] being plotted]
-  theme_clear <- theme_bw(base_size=20) + 
+  theme_clear <- theme_bw(base_size=20) +
     theme(axis.text.y=element_blank(),
           axis.text.x=element_blank(),
           axis.ticks=element_blank(),
@@ -140,14 +158,14 @@ ggtext <- function(plot.data,
           panel.grid.minor=element_blank(),
           panel.border=element_blank(),
           legend.key=element_rect(linetype="blank"))
-  
+
   theme_clear <- theme_clear + theme(legend.position="none")
   
   #base <- ggplot() + xlab(NULL) + ylab(NULL) + theme_clear;
   
   # Adding the text
   for (i in 1:length(allTerms)) {
-    browser();
+    #browser();
     for (j in 1:length(allTerms[[i]]$label)) {
       tmpLabel <- allTerms[[i]]$label[j];
       tmpX <- allTerms[[i]]$x[j];
@@ -155,12 +173,26 @@ ggtext <- function(plot.data,
       text(x = tmpX, y=tmpY, tmpLabel, adj = c(0,0), cex=text.relativeSize);
     }
     
-    browser();
-    plot();
+    #plot();
     #base <- base  + 
     #  geom_text(data=as.data.frame(allTerms[[i]]),
     #            aes(x=x,y=y,label=label), family=text.font, size=text.size)
   }
+  
+  # Draw the auxiliary line
+  segments(c(0), c(maxHeight),c(totalLength),c(maxHeight),col='gray',lty="dashed");
+  segments(c(0), c((distanceBetweenText + maxHeight) / 2),c(totalLength),c((distanceBetweenText + maxHeight) / 2),col='gray',lty="dashed");
+  segments(c(0), c((distanceBetweenText + maxHeight)),c(totalLength),c((distanceBetweenText + maxHeight)),col='gray',lty="dashed");
+  
+  # Draw the coefficient points and lines
+  for (i in 1:nrow(plot.data)) {
+    for (j in 1:ncol(plot.data)) {
+      coefficient <- plot.data[i,j];
+      
+    }
+  }
+  
+  browser();
   
   #dev.off();
   #return(base);

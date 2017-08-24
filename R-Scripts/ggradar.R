@@ -44,6 +44,7 @@ ggradar <- function(plot.data,
   library(ggplot2)
   # Retrieve the location of the script
   script.dir <- dirname(sys.frame(1)$ofile)
+  # Load the script containing commonly used functions
   source(paste(script.dir, "common.R", sep="/"))
 
   plot.data <- as.data.frame(plot.data)
@@ -161,6 +162,7 @@ funcCircleCoords <- function(center = c(0,0), r = 1, npoints = 100){
   textLines <- NULL
   textLines$path <- CalculateAxisPath(var.names,grid.max+abs(centre.y), grid.max+abs(centre.y)+line.offset)
   
+  browser();
   axis.labels <- breakText(axis.labels);
   #print(axis$path)
   # (d) Create file containing axis labels + associated plotting coordinates
