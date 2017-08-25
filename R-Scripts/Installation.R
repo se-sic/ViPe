@@ -1,5 +1,6 @@
 # Install ggplot2
 install.packages("ggplot2")
+install.packages("gridExtra")
 
 # Install devtools for downloading the newest version of some packages
 install.packages("devtools")
