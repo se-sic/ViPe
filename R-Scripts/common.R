@@ -3,37 +3,28 @@
 #' @author Christian Kaltenecker
 #' @export ggtext
 
-breakLine <- function(line, minimumLengthToSplit=15, doRecursiveCall=TRUE) {
+breakLine <- function(line, doRecursiveCall=TRUE) {
   #Breaks a line at the given minimum length if a certain symbol ('·') is parsed
   #Args:
   #   line: the line to split
   #   minimumLengthToSplit: the minimum length to split the line
   #   doRecursiveCall: a flag if recursive calls with smaller minimum lengths should be triggered
-  result <- "";
-  i <- minimumLengthToSplit;
-  found <- FALSE;
-  while (i <= nchar(line) && !found) {
+  result <- line;
+  i <- 1;
+  while (i <= nchar(line)) {
     character <- substring(line, i, i);
     if (character == '·') {
       left <- substring(line,0,i-1);
-      right <- breakLine(substring(line,i,nchar(line)), minimumLengthToSplit,FALSE);
-      result <- paste(left, right, sep="\n");
-      found <- TRUE;
+      right <- breakLine(substring(line,i+1,nchar(line)));
+      result <- paste(left, paste("×", right, sep=""), sep="\n");
     }
     i <- i + 1;
-  }
-  if (!found) {
-    if (minimumLengthToSplit != 5 && doRecursiveCall) {
-      return(breakLine(line,5,doRecursiveCall = FALSE));
-    } else {
-      return(line);
-    }
   }
   
   return(result);
 }
 
-breakText <- function(text, minimumLengthToSplit=15) {
+breakText <- function(text) {
   #Breaks the given text at the minimum length if a certain symbole ('·') is parsed
   #Args:
   #   text: the text to break
@@ -41,11 +32,7 @@ breakText <- function(text, minimumLengthToSplit=15) {
   result <- c();
   for (i in 1:length(text)) {
     stringLength <- nchar(text[i]);
-    if (stringLength <= minimumLengthToSplit) {
-      result <- c(result, text[i]);
-    } else {
-      result <- c(result, breakLine(text[i], minimumLengthToSplit));
-    }
+    result <- c(result, breakLine(text[i]));
   }
   return(result);
 }

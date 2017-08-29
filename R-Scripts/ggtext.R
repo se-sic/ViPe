@@ -95,11 +95,10 @@ ggtext <- function(plot.data,
   
   GenerateLayoutMatrix <- function(plot.data) {
     numberColumns <- ncol(plot.data) - 1;
-    result <- seq(1,numberColumns + 1);
-    result <- c(result, numberColumns + 2);
-    result <- c(result, rep(numberColumns + 3, numberColumns));
-    result <- c(result, seq(numberColumns + 4, 2 * numberColumns + 4));
-    result <- t(matrix(result, nrow=numberColumns + 1));
+    result <- c(1, seq(4,numberColumns+3));
+    result <- c(result, c(2, rep(numberColumns + 4, numberColumns)));
+    result <- c(result, c(3, seq(numberColumns + 5, 2 * numberColumns + 4)));
+    result <- matrix(result, nrow=numberColumns + 1);
     return(result);
   }
   
@@ -130,7 +129,27 @@ ggtext <- function(plot.data,
           panel.border=element_blank(),
           legend.key=element_rect(linetype="blank"))
   
-  # Adding the text
+  # Add an empty plot
+  plots <- c(plots, list(ggplot() + theme_clear))
+  
+  # Add the leftrightarrow with the plus and minus sign
+  plusPos <- data.frame(x=-3.8, y=3);
+  leftArrowPos <- data.frame(x=0, y=0, xend=-4, yend=0);
+  rightArrowPos <- data.frame(x=0, y=0, xend=4, yend=0);
+  minusPos <- data.frame(x=3.8, y=3);
+  anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
+  leftRightArrow <- ggplot() + theme_clear +
+    geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
+    geom_segment(data=rightArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
+    geom_text(data=plusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' + ''"), size=8, colour="lightgreen") + 
+    geom_text(data=minusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' - ''"), size=8, colour="indianred1") +
+    geom_point(data=anchorPos, mapping=aes(x=x,y=y), alpha=0, colour="white");
+  plots <- c(plots, list(leftRightArrow))
+  
+  # Add an empty plot
+  plots <- c(plots, list(ggplot() + theme_clear))
+  
+  # Add the text and the plot
   for (i in 1:length(allTerms)) {
     
     if (i > 1) {
@@ -152,49 +171,53 @@ ggtext <- function(plot.data,
       
       browser();
       # Add a plot for the labels
-      labelPlot <- ggplot() + theme_clear;
-      labelPlot <- labelPlot + 
-        geom_text(data = maxLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-        geom_text(data = midLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-        geom_text(data = minLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black");
-      plots <- c(plots, list(labelPlot));
+      # labelPlot <- ggplot() + theme_clear;
+      # labelPlot <- labelPlot + 
+      #   geom_text(data = maxLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
+      #   geom_text(data = midLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
+      #   geom_text(data = minLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black");
+      # plots <- c(plots, list(labelPlot));
       
       linePlot <- ggplot() + theme_clear;
-      linePlot <- linePlot +
+      linePlot <- linePlot + 
         # Maximim, middle and minimum line and the according labels
-        geom_line(data=maxLine, mapping=aes(x=x,y=y), linetype="dashed", colour="gray") +
+        geom_line(data=maxLine, mapping=aes(x=x,y=y), linetype="dashed", colour="lightgreen") +
         geom_line(data=midLine, mapping=aes(x=x,y=y), linetype="dashed", colour="gray") +
-        geom_line(data=minLine, mapping=aes(x=x,y=y), linetype="dashed", colour="gray") +
+        geom_line(data=minLine, mapping=aes(x=x,y=y), linetype="dashed", colour="indianred1") +
         
         geom_line(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour)) +
         
         geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
         geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
-        scale_colour_manual(values=c(colours[1], colours[2]));
+        scale_colour_manual(values=c(colours[1], colours[2])) +
+        # Rotate the plot
+        coord_flip() +
+        scale_x_reverse() + 
+        scale_y_reverse();
       
       plots <- c(plots, list(linePlot));
     }
     
     # Add one empty plot
-    plots <- c(plots, list(ggplot() + theme_clear));
+    #plots <- c(plots, list(ggplot() + theme_clear));
     
     for (j in 1:length(allTerms[[i]]$label)) {
       tmpLabel <- allTerms[[i]]$label[j];
       dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
       tmpPlot <- ggplot() + theme_clear;
       tmpPlot <- tmpPlot + 
-        geom_text(data=dataframe , mapping=aes(x=x,y=y,label=label), angle=-90, family = text.font, colour=colours[i], size = text.size);
+        geom_text(data=dataframe , mapping=aes(x=x,y=y,label=label), family = text.font, colour=colours[i], size = text.size); #, angle=-90 
       plots <- c(plots, list(tmpPlot));
     }
     
   }
   
   numberTerms <- ncol(plot.data) - 1;
-  rationPlots_x <- c(1/30, rep(1/numberTerms * 29/30, numberTerms));
-  rationPlots_y <- c(3.5/10, 5/10, 3.5/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
+  rationPlots_x <- c(3.5/10, 5/10, 3.5/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
+  rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
   layoutMatrix <- GenerateLayoutMatrix(plot.data);
   browser();
-  do.call(grid.arrange, c(plots,list(heights =rationPlots_y, widths = rationPlots_x, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
+  do.call(grid.arrange, c(plots,list(widths =rationPlots_x, heights = rationPlots_y, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
   
   browser();
   
