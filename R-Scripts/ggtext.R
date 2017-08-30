@@ -4,7 +4,7 @@
 
 ggtext <- function(plot.data,
                    text.font = "Circular Air Light",
-                   text.size = 4,
+                   text.size = 8,
                    curve.colour = "blue",
                    group.point.size = 6,
                    label.size = 4,
@@ -88,10 +88,10 @@ ggtext <- function(plot.data,
     # Compute the coordinates of the points
     result <- NULL;
     for (i in 1:nrow(plot.data)) {
-      counter <- 1;
+      counter <- ncol(plot.data)-1;
       for (j in 2:ncol(plot.data)) {
-        result <- rbind(result, data.frame(x = counter, y = plot.data[i,j], group = i, colour=colours[i]))
-        counter <- counter + 1;
+        result <- rbind(result, data.frame(y = counter, x = plot.data[i,j], group = i, colour=colours[i]))
+        counter <- counter - 1;
       }
     }
     return(result);
@@ -119,7 +119,7 @@ ggtext <- function(plot.data,
   # Compute the size of the textes
   textSizes <- ComputeTextSizes(allTerms, text.font, text.size)
 
-  # PLOTING
+  # Create the plot
   
   # Delcare 'theme_clear', with or without a plot legend as required by user
   #[default = no legend if only 1 group [path] being plotted]
@@ -154,73 +154,115 @@ ggtext <- function(plot.data,
   plots <- c(plots, list(ggplot() + theme_clear))
   
   # Add the text and the plot
-  for (i in 1:length(allTerms)) {
+  
+  # Retrieve line and point data
+  lineData <- ComputePointCoordinates(plot.data, colours);
+  eqZero <- lineData[lineData[,2]==0,];
+  nonZero <- lineData[lineData[,2]!=0,];
+  
+  maximumX <- max(lineData[,1]);
+  maximumY <- max(abs(lineData[,2]));
+  maxLine <- rbind(data.frame(x=1, y=maximumY), data.frame(x=maximumX, y=maximumY));
+  maxLabel <- data.frame(x=2, y=maximumY, label="+");
+  
+  midLine <- rbind(data.frame(x=1, y=0), data.frame(x=maximumX, y=0));
+  midLabel <- data.frame(x=2, y=0, label="0");
+  
+  minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
+  minLabel <- data.frame(x=2, y=-maximumY, label="-");
+  
+  # Add a plot for the labels
+  # labelPlot <- ggplot() + theme_clear;
+  # labelPlot <- labelPlot + 
+  #   geom_text(data = maxLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
+  #   geom_text(data = midLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
+  #   geom_text(data = minLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black");
+  # plots <- c(plots, list(labelPlot));
+  
+  linePlot <- ggplot() + theme_clear;
+  linePlot <- linePlot + 
+    # Maximim, middle and minimum line and the according labels
+    geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="lightgreen") +
+    geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="gray") +
+    geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="indianred1") +
     
-    if (i > 1) {
-      # Retrieve line and point data
-      lineData <- ComputePointCoordinates(plot.data, colours);
-      eqZero <- lineData[lineData[,2]==0,];
-      nonZero <- lineData[lineData[,2]!=0,];
-      
-      maximumX <- max(lineData[,1]);
-      maximumY <- max(abs(lineData[,2]));
-      maxLine <- rbind(data.frame(x=1, y=maximumY), data.frame(x=maximumX, y=maximumY));
-      maxLabel <- data.frame(x=2, y=maximumY, label="+");
-      
-      midLine <- rbind(data.frame(x=1, y=0), data.frame(x=maximumX, y=0));
-      midLabel <- data.frame(x=2, y=0, label="0");
-      
-      minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
-      minLabel <- data.frame(x=2, y=-maximumY, label="-");
-      
-      # Add a plot for the labels
-      # labelPlot <- ggplot() + theme_clear;
-      # labelPlot <- labelPlot + 
-      #   geom_text(data = maxLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-      #   geom_text(data = midLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-      #   geom_text(data = minLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black");
-      # plots <- c(plots, list(labelPlot));
-      
-      linePlot <- ggplot() + theme_clear;
-      linePlot <- linePlot + 
-        # Maximim, middle and minimum line and the according labels
-        geom_line(data=maxLine, mapping=aes(x=x,y=y), linetype="dashed", colour="lightgreen") +
-        geom_line(data=midLine, mapping=aes(x=x,y=y), linetype="dashed", colour="gray") +
-        geom_line(data=minLine, mapping=aes(x=x,y=y), linetype="dashed", colour="indianred1") +
-        
-        geom_line(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour), size=2) +
-        
-        geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
-        geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
-        scale_colour_manual(values=c(colours[1], colours[2])) +
-        # Rotate the plot
-        coord_flip() +
-        scale_x_reverse() + 
-        scale_y_reverse();
-      
-      plots <- c(plots, list(linePlot));
-    }
+    geom_path(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour), size=2) +
     
-    # Add one empty plot
-    #plots <- c(plots, list(ggplot() + theme_clear));
+    geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
+    geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
+    scale_colour_manual(values=c(colours[1], colours[2])) +
+    # Rotate the plot
+    #coord_flip() +
+    #scale_x_reverse() + 
+    #scale_y_reverse() +
+    theme(plot.margin = unit(c(1,3,1,3), "lines")); # Make room for the grobs
+  
+  # Add the text on the left and the right side, respectively
+  browser();
+  counter <- length(allTerms[[1]]$label);
+
+  for (j in 1:length(allTerms[[1]]$label)) {
+    tmpLabel <- allTerms[[1]]$label[j];
+    #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
+    #tmpPlot <- ggplot() + theme_clear;
+    #tmpPlot <- tmpPlot + 
+    xCoord <- maximumY + 0.025 #+ textSizes[[j]]$width / 10;
+
+    xCoord <- -xCoord;
     
-    for (j in 1:length(allTerms[[i]]$label)) {
-      tmpLabel <- allTerms[[i]]$label[j];
-      dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
-      tmpPlot <- ggplot() + theme_clear;
-      tmpPlot <- tmpPlot + 
-        geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
-      plots <- c(plots, list(tmpPlot));
-    }
+    yCoord <- counter;
+    counter <- counter - 1;
     
+    linePlot <- linePlot + 
+      annotation_custom(
+        grob = textGrob(label = allTerms[[i]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
+        ymin = yCoord,      # Vertical position of the textGrob
+        ymax = yCoord,
+        xmin = xCoord - 0.1,         # Note: The grobs are positioned outside the plot area
+        xmax = xCoord)
+      #geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
+    #plots <- c(plots, list(tmpPlot));
+    # Code to override clipping
   }
+  
+  
+  counter <- length(allTerms[[2]]$label);
+  for (j in 1:length(allTerms[[2]]$label)) {
+    tmpLabel <- allTerms[[2]]$label[j];
+    #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
+    #tmpPlot <- ggplot() + theme_clear;
+    #tmpPlot <- tmpPlot + 
+    xCoord <- maximumY + 0.025;
+    
+    yCoord <- counter;
+    counter <- counter - 1;
+    
+    linePlot <- linePlot + 
+      annotation_custom(
+        grob = textGrob(label = allTerms[[i]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
+        ymin = yCoord,      # Vertical position of the textGrob
+        ymax = yCoord,
+        xmin = xCoord,         # Note: The grobs are positioned outside the plot area
+        xmax = xCoord)
+    #geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
+    #plots <- c(plots, list(tmpPlot));
+    # Code to override clipping
+  }
+  
+  #gt <- ggplot_gtable(ggplot_build(linePlot))
+  #gt$layout$clip[gt$layout$name == "panel"] <- "off"
+  #grid.draw(gt);
+  browser();
+  
+  plots <- c(plots, list(linePlot));
+  
   
   numberTerms <- ncol(plot.data) - 1;
   rationPlots_x <- c(3/10, 6/10, 3/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
   rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
   layoutMatrix <- GenerateLayoutMatrix(plot.data);
   browser();
-  do.call(grid.arrange, c(plots,list(widths =rationPlots_x, heights = rationPlots_y, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
+  #do.call(grid.arrange, c(plots,list(widths =rationPlots_x, heights = rationPlots_y, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
   
   browser();
   
