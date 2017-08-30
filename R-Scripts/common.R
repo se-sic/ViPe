@@ -3,28 +3,67 @@
 #' @author Christian Kaltenecker
 #' @export ggtext
 
-breakLine <- function(line, doRecursiveCall=TRUE) {
+breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=TRUE) {
   #Breaks a line at the given minimum length if a certain symbol ('·') is parsed
   #Args:
   #   line: the line to split
   #   minimumLengthToSplit: the minimum length to split the line
   #   doRecursiveCall: a flag if recursive calls with smaller minimum lengths should be triggered
-  result <- line;
+  result <- "";
   i <- 1;
-  while (i <= nchar(line)) {
+  found <- FALSE;
+  while (i <= nchar(line) && !found) {
     character <- substring(line, i, i);
-    if (character == '·') {
+    if (character == '*') {
       left <- substring(line,0,i-1);
-      right <- breakLine(substring(line,i+1,nchar(line)));
-      result <- paste(left, paste("×", right, sep=""), sep="\n");
+      right <- breakLine(substring(line,i+1,nchar(line)), rightAlign);
+      if (rightAlign) {
+        result <- paste(paste(left, "×", sep=""), right, sep="\n");
+      } else {
+        result <- paste(left, paste("×", right, sep=""), sep="\n");
+      }
+      found <- TRUE;
     }
     i <- i + 1;
+  }
+  if (result == "") {
+    return(line);
+  }
+  return(result);
+}
+
+prepareLine <- function(line) {
+  #
+  
+  strings <- strsplit(line,"\\*");
+  counter <- NULL;
+  
+  for (i in 1:length(strings[[1]])) {
+    name <- strings[[1]][i];
+    if (name %in% names(counter)) {
+      counter[[name]] <- counter[[name]] + 1;
+    } else {
+      counter[[name]] <- 1;
+    }
+  }
+  
+  result <- "";
+  
+  for (i in 1:length(names(counter))) {
+    name <- names(counter)[i];
+    result <- paste(result, name, sep="");
+    if (counter[[name]] > 1) {
+      result <- paste(result, "^", counter[[name]] , sep="");
+    }
+    if (i < length(names(counter))) {
+      result <- paste(result, "*", sep="");
+    }
   }
   
   return(result);
 }
 
-breakText <- function(text) {
+breakText <- function(text, rightAlign=FALSE) {
   #Breaks the given text at the minimum length if a certain symbole ('·') is parsed
   #Args:
   #   text: the text to break
@@ -32,7 +71,7 @@ breakText <- function(text) {
   result <- c();
   for (i in 1:length(text)) {
     stringLength <- nchar(text[i]);
-    result <- c(result, breakLine(text[i]));
+    result <- c(result, breakLine(text[i], leftAlign));
   }
   return(result);
 }

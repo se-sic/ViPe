@@ -8,7 +8,7 @@ ggtext <- function(plot.data,
                    curve.colour = "blue",
                    group.point.size = 6,
                    label.size = 4,
-                   colours = c("#FF5A5F", "#1122FF")) 
+                   colours = c("#FF5A5F", "#FFB400")) 
 {
   # PREPARATION
   
@@ -32,9 +32,13 @@ ggtext <- function(plot.data,
   # DECLARATION OF INTERNAL FUNCTIONS
   
   GetTermIfAvailable <- function(column) {
-    termName <- breakLine(colnames(column)[1]);
     result <- c();
     for (j in 1:nrow(column)) {
+      rightAlign <- FALSE;
+      if (j == 1) {
+        rightAlign <- TRUE;
+      }
+      termName <- breakLine(prepareLine(colnames(column)[1]), rightAlign);
       # Return empty string
       if (column[j,] == 0) {
         result <- c(result, "");
@@ -133,15 +137,15 @@ ggtext <- function(plot.data,
   plots <- c(plots, list(ggplot() + theme_clear))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=-3.8, y=3);
+  plusPos <- data.frame(x=-5, y=0);
   leftArrowPos <- data.frame(x=0, y=0, xend=-4, yend=0);
   rightArrowPos <- data.frame(x=0, y=0, xend=4, yend=0);
-  minusPos <- data.frame(x=3.8, y=3);
+  minusPos <- data.frame(x=5, y=0);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
     geom_segment(data=rightArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
-    geom_text(data=plusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' + ''"), size=8, colour="lightgreen") + 
+    geom_text(data=plusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' + ''"), size=8, colour="green") + 
     geom_text(data=minusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' - ''"), size=8, colour="indianred1") +
     geom_point(data=anchorPos, mapping=aes(x=x,y=y), alpha=0, colour="white");
   plots <- c(plots, list(leftRightArrow))
@@ -169,7 +173,6 @@ ggtext <- function(plot.data,
       minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
       minLabel <- data.frame(x=2, y=-maximumY, label="-");
       
-      browser();
       # Add a plot for the labels
       # labelPlot <- ggplot() + theme_clear;
       # labelPlot <- labelPlot + 
@@ -185,7 +188,7 @@ ggtext <- function(plot.data,
         geom_line(data=midLine, mapping=aes(x=x,y=y), linetype="dashed", colour="gray") +
         geom_line(data=minLine, mapping=aes(x=x,y=y), linetype="dashed", colour="indianred1") +
         
-        geom_line(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour)) +
+        geom_line(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour), size=2) +
         
         geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
         geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
@@ -206,14 +209,14 @@ ggtext <- function(plot.data,
       dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
       tmpPlot <- ggplot() + theme_clear;
       tmpPlot <- tmpPlot + 
-        geom_text(data=dataframe , mapping=aes(x=x,y=y,label=label), family = text.font, colour=colours[i], size = text.size); #, angle=-90 
+        geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
       plots <- c(plots, list(tmpPlot));
     }
     
   }
   
   numberTerms <- ncol(plot.data) - 1;
-  rationPlots_x <- c(3.5/10, 5/10, 3.5/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
+  rationPlots_x <- c(3/10, 6/10, 3/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
   rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
   layoutMatrix <- GenerateLayoutMatrix(plot.data);
   browser();
