@@ -136,9 +136,6 @@ ggtext <- function(plot.data,
           panel.border=element_blank(),
           legend.key=element_rect(linetype="blank"))
   
-  # Add an empty plot
-  #plots <- c(plots, list(ggplot() + theme_clear))
-  
   # Add the leftrightarrow with the plus and minus sign
   plusPos <- data.frame(x=4.1, y=0);
   leftArrowPos <- data.frame(x=0, y=0, xend=-3.5, yend=0);
@@ -152,9 +149,6 @@ ggtext <- function(plot.data,
     geom_text(data=minusPos, parse=TRUE, mapping=aes(x=x, y=y, label="'' - ''"), size=8, colour="indianred1") +
     geom_point(data=anchorPos, mapping=aes(x=x,y=y), alpha=0, colour="white");
   plots <- c(plots, list(leftRightArrow))
-  
-  # Add an empty plot
-  #plots <- c(plots, list(ggplot() + theme_clear))
   
   # Add the text and the plot
   
@@ -174,14 +168,6 @@ ggtext <- function(plot.data,
   minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
   minLabel <- data.frame(x=2, y=-maximumY, label="-");
   
-  # Add a plot for the labels
-  # labelPlot <- ggplot() + theme_clear;
-  # labelPlot <- labelPlot + 
-  #   geom_text(data = maxLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-  #   geom_text(data = midLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black") +
-  #   geom_text(data = minLabel, mapping=aes(x=x, y=y, label=label), size=label.size, colour="black");
-  # plots <- c(plots, list(labelPlot));
-  
   linePlot <- ggplot() + theme_clear;
   linePlot <- linePlot + 
     # Maximim, middle and minimum line and the according labels
@@ -194,10 +180,6 @@ ggtext <- function(plot.data,
     geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
     geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
     scale_colour_manual(labels=legend.labels, values=c(colours[1], colours[2])) +
-    # Rotate the plot
-    #coord_flip() +
-    #scale_x_reverse() + 
-    #scale_y_reverse() +
     theme(plot.margin = unit(c(1,10,1,10), "lines")); # Make room for the grobs
   
   # Include the legend
@@ -215,10 +197,7 @@ ggtext <- function(plot.data,
 
   for (j in 1:length(allTerms[[1]]$label)) {
     tmpLabel <- allTerms[[1]]$label[j];
-    #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
-    #tmpPlot <- ggplot() + theme_clear;
-    #tmpPlot <- tmpPlot + 
-    xCoord <- maximumY + 0.02 #+ textSizes[[j]]$width / 10;
+    xCoord <- maximumY + 0.02
 
     xCoord <- -xCoord;
     
@@ -232,18 +211,12 @@ ggtext <- function(plot.data,
         ymax = yCoord,
         xmin = xCoord,         # Note: The grobs are positioned outside the plot area
         xmax = xCoord)
-      #geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
-    #plots <- c(plots, list(tmpPlot));
-    # Code to override clipping
   }
   
   
   counter <- length(allTerms[[2]]$label);
   for (j in 1:length(allTerms[[2]]$label)) {
     tmpLabel <- allTerms[[2]]$label[j];
-    #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
-    #tmpPlot <- ggplot() + theme_clear;
-    #tmpPlot <- tmpPlot + 
     xCoord <- maximumY + 0.02;
     
     yCoord <- counter;
@@ -256,29 +229,18 @@ ggtext <- function(plot.data,
         ymax = yCoord,
         xmin = xCoord,         # Note: The grobs are positioned outside the plot area
         xmax = xCoord)
-    #geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
-    #plots <- c(plots, list(tmpPlot));
-    # Code to override clipping
+    
   }
   
+  # Code to override clipping
   gt <- ggplot_gtable(ggplot_build(linePlot))
   gt$layout$clip[gt$layout$name == "panel"] <- "off"
-  #grid.draw(gt);
-  browser();
   
   plots <- c(plots, list(gt));
   
-  
-  #numberTerms <- ncol(plot.data) - 1;
-  #rationPlots_x <- c(3/10, 6/10, 3/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
-  #rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
-  #layoutMatrix <- GenerateLayoutMatrix(plot.data);
-  #browser();
-  #do.call(grid.arrange, c(plots,list(widths =rationPlots_x, heights = rationPlots_y, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
   grid.arrange(leftRightArrow, gt, ncol=1, heights=c(1/20,19/20))
   browser();
   
   dev.off();
   graphics.off();
-  #return(base);
 }
