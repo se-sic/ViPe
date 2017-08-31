@@ -3,7 +3,7 @@
 #' @author Christian Kaltenecker
 #' @export ggtext
 
-breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=TRUE) {
+breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
   #Breaks a line at the given minimum length if a certain symbol ('·') is parsed
   #Args:
   #   line: the line to split
@@ -16,11 +16,19 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=TRUE) {
     character <- substring(line, i, i);
     if (character == '*') {
       left <- substring(line,0,i-1);
-      right <- breakLine(substring(line,i+1,nchar(line)), rightAlign);
-      if (rightAlign) {
-        result <- paste(paste(left, "×", sep=""), right, sep="\n");
+      right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE);
+      if (doRecursiveCall) {
+        if (rightAlign) {
+          result <- paste(paste(left, "×", sep=""), right, sep="\n");
+        } else {
+          result <- paste(left, paste("×", right, sep=""), sep="\n");
+        }
       } else {
-        result <- paste(left, paste("×", right, sep=""), sep="\n");
+        if (rightAlign) {
+          result <- paste(paste(left, "×", sep=""), "\n", right, "  ", sep="");
+        } else {
+          result <- paste("  ", left, "\n", paste("×", right, sep=""), sep="");
+        }
       }
       found <- TRUE;
     }

@@ -61,7 +61,6 @@ ggtext <- function(plot.data,
     
     for (i in 2:ncol(plot.data)) {
       terms <- GetTermIfAvailable(plot.data[i]);
-      
       for (j in 1:nrow(plot.data[i])) {
         allTerms[[j]]$label <- c(allTerms[[j]]$label, terms[j]);
       }
@@ -118,7 +117,7 @@ ggtext <- function(plot.data,
   # CONVERSION OF THE DATA (if needed)
   allTerms <- NULL;
   allTerms <- ComputeStrings(plot.data);
-  
+
   # Compute the size of the textes
   textSizes <- ComputeTextSizes(allTerms, text.font, text.size)
 
@@ -137,10 +136,10 @@ ggtext <- function(plot.data,
           legend.key=element_rect(linetype="blank"))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=4.1, y=0);
-  leftArrowPos <- data.frame(x=0, y=0, xend=-3.5, yend=0);
-  rightArrowPos <- data.frame(x=0, y=0, xend=3.5, yend=0);
-  minusPos <- data.frame(x=-4.1, y=0);
+  plusPos <- data.frame(x=3.25, y=0);
+  leftArrowPos <- data.frame(x=0, y=0, xend=-3, yend=0);
+  rightArrowPos <- data.frame(x=0, y=0, xend=3, yend=0);
+  minusPos <- data.frame(x=-3.25, y=0);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
@@ -197,7 +196,7 @@ ggtext <- function(plot.data,
 
   for (j in 1:length(allTerms[[1]]$label)) {
     tmpLabel <- allTerms[[1]]$label[j];
-    xCoord <- maximumY + 0.02
+    xCoord <- maximumY + 0.025
 
     xCoord <- -xCoord;
     
@@ -217,7 +216,7 @@ ggtext <- function(plot.data,
   counter <- length(allTerms[[2]]$label);
   for (j in 1:length(allTerms[[2]]$label)) {
     tmpLabel <- allTerms[[2]]$label[j];
-    xCoord <- maximumY + 0.02;
+    xCoord <- maximumY + 0.025;
     
     yCoord <- counter;
     counter <- counter - 1;
@@ -238,7 +237,7 @@ ggtext <- function(plot.data,
   
   plots <- c(plots, list(gt));
   
-  grid.arrange(leftRightArrow, gt, ncol=1, heights=c(1/20,19/20))
+  grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
   browser();
   
   dev.off();
