@@ -8,7 +8,10 @@ ggtext <- function(plot.data,
                    curve.colour = "blue",
                    group.point.size = 6,
                    label.size = 4,
-                   colours = c("#FF5A5F", "#FFB400")) 
+                   colours = c("#FF5A5F", "#FFB400"),
+                   legend.title="",
+                   legend.text.size = 7,
+                   legend.labels=c("Perf1", "Perf2")) 
 {
   # PREPARATION
   
@@ -134,13 +137,13 @@ ggtext <- function(plot.data,
           legend.key=element_rect(linetype="blank"))
   
   # Add an empty plot
-  plots <- c(plots, list(ggplot() + theme_clear))
+  #plots <- c(plots, list(ggplot() + theme_clear))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=-5, y=0);
-  leftArrowPos <- data.frame(x=0, y=0, xend=-4, yend=0);
-  rightArrowPos <- data.frame(x=0, y=0, xend=4, yend=0);
-  minusPos <- data.frame(x=5, y=0);
+  plusPos <- data.frame(x=4.1, y=0);
+  leftArrowPos <- data.frame(x=0, y=0, xend=-3.5, yend=0);
+  rightArrowPos <- data.frame(x=0, y=0, xend=3.5, yend=0);
+  minusPos <- data.frame(x=-4.1, y=0);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
@@ -151,7 +154,7 @@ ggtext <- function(plot.data,
   plots <- c(plots, list(leftRightArrow))
   
   # Add an empty plot
-  plots <- c(plots, list(ggplot() + theme_clear))
+  #plots <- c(plots, list(ggplot() + theme_clear))
   
   # Add the text and the plot
   
@@ -190,12 +193,21 @@ ggtext <- function(plot.data,
     
     geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
     geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
-    scale_colour_manual(values=c(colours[1], colours[2])) +
+    scale_colour_manual(labels=legend.labels, values=c(colours[1], colours[2])) +
     # Rotate the plot
     #coord_flip() +
     #scale_x_reverse() + 
     #scale_y_reverse() +
-    theme(plot.margin = unit(c(1,3,1,3), "lines")); # Make room for the grobs
+    theme(plot.margin = unit(c(1,10,1,10), "lines")); # Make room for the grobs
+  
+  # Include the legend
+  linePlot  <- linePlot + labs(colour=legend.title,size=legend.text.size) +
+    theme(legend.key.width=unit(3,"line")) + theme(text = element_text(size = 20,
+                                                                                    family = text.font)) +
+    theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
+    theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
+    theme(legend.key.height=unit(2,"line")) +
+    theme(text=element_text(family=text.font))
   
   # Add the text on the left and the right side, respectively
   browser();
@@ -206,7 +218,7 @@ ggtext <- function(plot.data,
     #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
     #tmpPlot <- ggplot() + theme_clear;
     #tmpPlot <- tmpPlot + 
-    xCoord <- maximumY + 0.025 #+ textSizes[[j]]$width / 10;
+    xCoord <- maximumY + 0.02 #+ textSizes[[j]]$width / 10;
 
     xCoord <- -xCoord;
     
@@ -215,10 +227,10 @@ ggtext <- function(plot.data,
     
     linePlot <- linePlot + 
       annotation_custom(
-        grob = textGrob(label = allTerms[[i]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
+        grob = textGrob(label = allTerms[[1]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
         ymin = yCoord,      # Vertical position of the textGrob
         ymax = yCoord,
-        xmin = xCoord - 0.1,         # Note: The grobs are positioned outside the plot area
+        xmin = xCoord,         # Note: The grobs are positioned outside the plot area
         xmax = xCoord)
       #geom_text(data=dataframe, mapping=aes(x=x,y=y,label=label), family = text.font, colour="black", size = text.size, hjust=2-i); #, angle=-90 
     #plots <- c(plots, list(tmpPlot));
@@ -232,14 +244,14 @@ ggtext <- function(plot.data,
     #dataframe <- data.frame(x=0 , y=0, label=tmpLabel)
     #tmpPlot <- ggplot() + theme_clear;
     #tmpPlot <- tmpPlot + 
-    xCoord <- maximumY + 0.025;
+    xCoord <- maximumY + 0.02;
     
     yCoord <- counter;
     counter <- counter - 1;
     
     linePlot <- linePlot + 
       annotation_custom(
-        grob = textGrob(label = allTerms[[i]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
+        grob = textGrob(label = allTerms[[2]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
         ymin = yCoord,      # Vertical position of the textGrob
         ymax = yCoord,
         xmin = xCoord,         # Note: The grobs are positioned outside the plot area
@@ -249,21 +261,21 @@ ggtext <- function(plot.data,
     # Code to override clipping
   }
   
-  #gt <- ggplot_gtable(ggplot_build(linePlot))
-  #gt$layout$clip[gt$layout$name == "panel"] <- "off"
+  gt <- ggplot_gtable(ggplot_build(linePlot))
+  gt$layout$clip[gt$layout$name == "panel"] <- "off"
   #grid.draw(gt);
   browser();
   
-  plots <- c(plots, list(linePlot));
+  plots <- c(plots, list(gt));
   
   
-  numberTerms <- ncol(plot.data) - 1;
-  rationPlots_x <- c(3/10, 6/10, 3/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
-  rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
-  layoutMatrix <- GenerateLayoutMatrix(plot.data);
-  browser();
+  #numberTerms <- ncol(plot.data) - 1;
+  #rationPlots_x <- c(3/10, 6/10, 3/10); #c(maxWidth, maxWidth)#, distanceBetweenText, maxWidth);
+  #rationPlots_y <- c(2/30, rep(1/numberTerms * 28/30, numberTerms));
+  #layoutMatrix <- GenerateLayoutMatrix(plot.data);
+  #browser();
   #do.call(grid.arrange, c(plots,list(widths =rationPlots_x, heights = rationPlots_y, layout_matrix = layoutMatrix)))#, nrow=nrow(plot.data) + 1, ncol=numberTerms)))
-  
+  grid.arrange(leftRightArrow, gt, ncol=1, heights=c(1/20,19/20))
   browser();
   
   dev.off();
