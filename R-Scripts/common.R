@@ -78,8 +78,7 @@ breakText <- function(text, rightAlign=FALSE) {
   #   minimumLengthToSplit: the minimum length for the text to split
   result <- c();
   for (i in 1:length(text)) {
-    stringLength <- nchar(text[i]);
-    result <- c(result, breakLine(text[i], leftAlign));
+    result <- c(result, breakLine(text[i], rightAlign=rightAlign));
   }
   return(result);
 }

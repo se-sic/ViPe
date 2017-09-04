@@ -11,7 +11,7 @@ ggtext <- function(plot.data,
                    colours = c("#FF5A5F", "#FFB400"),
                    legend.title="",
                    legend.text.size = 7,
-                   legend.labels=c("Perf1", "Perf2")) 
+                   legend.labels=c("Perf1 (left)", "Perf2 (right)")) 
 {
   # PREPARATION
   
@@ -92,7 +92,7 @@ ggtext <- function(plot.data,
     for (i in 1:nrow(plot.data)) {
       counter <- ncol(plot.data)-1;
       for (j in 2:ncol(plot.data)) {
-        result <- rbind(result, data.frame(y = counter, x = plot.data[i,j], group = i, colour=colours[i]))
+        result <- rbind(result, data.frame(y = counter, x = plot.data[i,j], colour=colours[i], group = plot.data[i,1]))
         counter <- counter - 1;
       }
     }
@@ -167,18 +167,18 @@ ggtext <- function(plot.data,
   minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
   minLabel <- data.frame(x=2, y=-maximumY, label="-");
   
-  linePlot <- ggplot() + theme_clear;
+  linePlot <- ggplot(data=lineData) + theme_clear;
   linePlot <- linePlot + 
     # Maximim, middle and minimum line and the according labels
     geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="lightgreen") +
     geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="gray") +
     geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="indianred1") +
     
-    geom_path(data=lineData, mapping=aes(x=x,y=y,group=group, colour=colour), size=2) +
+    geom_path(data=lineData, mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
     
-    geom_point(data=eqZero,aes(x=x,y=y,group=group, colour=colour), shape=21, fill="white", size=group.point.size) +
-    geom_point(data=nonZero,aes(x=x,y=y,group=group, colour=colour), size=group.point.size) +
-    scale_colour_manual(labels=legend.labels, values=c(colours[1], colours[2])) +
+    geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group), shape=21, fill="white", size=group.point.size) +
+    geom_point(data=nonZero,aes(x=x,y=y, colour=colour, group=group), size=group.point.size) +
+    scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
     theme(plot.margin = unit(c(1,10,1,10), "lines")); # Make room for the grobs
   
   # Include the legend
@@ -191,7 +191,6 @@ ggtext <- function(plot.data,
     theme(text=element_text(family=text.font))
   
   # Add the text on the left and the right side, respectively
-  browser();
   counter <- length(allTerms[[1]]$label);
 
   for (j in 1:length(allTerms[[1]]$label)) {

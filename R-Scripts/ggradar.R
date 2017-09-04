@@ -83,8 +83,7 @@ CalculateGroupPath <- function(df,rv) {
   ##create graph data frame
   graphData= data.frame(seg="", x=0,y=0,val=0)
   graphData=graphData[-1,]
-  
-  allLevels = levels(path);
+  allLevels = rev(levels(path));
   for(count in 1:length(path)){
     i = allLevels[count];
     pathData = subset(df, df[,1]==i)
@@ -162,8 +161,10 @@ funcCircleCoords <- function(center = c(0,0), r = 1, npoints = 100){
   textLines <- NULL
   textLines$path <- CalculateAxisPath(var.names,grid.max+abs(centre.y), grid.max+abs(centre.y)+line.offset)
   
-  browser();
-  axis.labels <- breakText(axis.labels);
+  # Split the labels of the axis for alignment
+  splitLabels <- split(axis.labels, 1:2);
+  
+  axis.labels <- c(breakText(splitLabels[[1]]), breakText(splitLabels[[2]], rightAlign=TRUE));
   #print(axis$path)
   # (d) Create file containing axis labels + associated plotting coordinates
   #Labels
@@ -255,15 +256,15 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
                            size=group.line.width)
 
   # Filter the group points
-  noneZero <- group$path;
-  noneZero <- noneZero[noneZero$val != 0,];
+  nonZero <- group$path;
+  nonZero <- nonZero[nonZero$val != 0,];
   eqZero <- group$path;
   eqZero <- eqZero[group$path$val == 0,];
   
   # ... + group points (cluster data)
   base <- base + geom_point(data=eqZero,aes(x=x,y=y,group=group,colour=group), shape=21, fill="white", size=group.point.size)
-  base <- base + geom_point(data=noneZero,aes(x=x,y=y,group=group,colour=group), size=group.point.size)
-
+  base <- base + geom_point(data=nonZero,aes(x=x,y=y,group=group,colour=group), size=group.point.size)
+  browser();
 
   #... + amend Legend title
   if (plot.legend==TRUE) base  <- base + labs(colour=legend.title,size=legend.text.size)
