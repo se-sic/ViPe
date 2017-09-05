@@ -34,6 +34,8 @@ ggradar <- function(plot.data,
                              group.line.width=1.5,
                              group.point.size=6,
                              background.circle.colour="#D7D6D1",
+                             background.circle.inner.colour = "indianred1", 
+                             background.circle.outer.colour = "green",
                              background.circle.transparency=0.2,
                              plot.legend=if (nrow(plot.data)>1) TRUE else FALSE,
                              legend.title="",
@@ -239,9 +241,23 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   # + theme_clear [to remove grey plot background, grid lines, axis tick marks and axis text]
   base <- base + theme_clear
   #  + background circle against which to plot radar data
+  
+  # The first cirlce is the outer one
   base <- base + geom_polygon(data=gridline$max$path,aes(x,y),
-                              fill=background.circle.colour,
+                              fill=background.circle.outer.colour,
                               alpha=background.circle.transparency)
+  # For the inner circle, a white opaque circle is placed firstly
+  base <- base + geom_polygon(data=gridline$mid$path,aes(x,y),
+                              fill="white",
+                              alpha=1)
+  base <- base + geom_polygon(data=gridline$mid$path,aes(x,y),
+                              fill=background.circle.inner.colour,
+                              alpha=background.circle.transparency)
+  # The innermost circle should remain white
+  base <- base + geom_polygon(data=gridline$min$path,aes(x,y),
+                              fill="white",
+                              alpha=1)
+  
 
   # + radial axes
   base <- base + geom_path(data=axis$path,aes(x=x,y=y,group=axis.no),
@@ -264,7 +280,6 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   # ... + group points (cluster data)
   base <- base + geom_point(data=eqZero,aes(x=x,y=y,group=group,colour=group), shape=21, fill="white", size=group.point.size)
   base <- base + geom_point(data=nonZero,aes(x=x,y=y,group=group,colour=group), size=group.point.size)
-  browser();
 
   #... + amend Legend title
   if (plot.legend==TRUE) base  <- base + labs(colour=legend.title,size=legend.text.size)
@@ -291,7 +306,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
                                                                                       family = font.radar)) +
   theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
   theme(legend.key.height=unit(2,"line")) +
-  scale_colour_manual(values=rep(c("#FF5A5F", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
+  scale_colour_manual(values=rep(c("#4045FF", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
     "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +
   theme(text=element_text(family=font.radar)) + 
   theme(legend.title=element_blank())

@@ -41,6 +41,6 @@ performanceModels[-1] <- performanceModels[-1]  / maximumValue
 #colnames(performanceModels) <- gsub("Â", "",colnames(performanceModels))
 
 source("C:/Users/chris_000/Desktop/Uni/ViPe/R-Scripts/ggtext.R")
-ggtext(performanceModels, text.font = "sans")
+ggtext(performanceModels, text.font = "sans", text.size=12)
 source("C:/Users/chris_000/Desktop/Uni/ViPe/R-Scripts/ggradar.R")
-print(ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("", "0%", ""), grid.min = -1, grid.mid = 0, grid.max = 1, gridline.min.colour = "indianred1", gridline.max.colour = "green", legend.text.size=10))
+print(ggradar(performanceModels, axis.label.size=3, grid.label.size=5, font.radar = "sans", legend.title = "Performance Models", values.radar = c("", "0%", ""), grid.min = -1, grid.mid = 0, grid.max = 1, legend.text.size=10))

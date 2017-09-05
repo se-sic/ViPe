@@ -8,7 +8,7 @@ ggtext <- function(plot.data,
                    curve.colour = "blue",
                    group.point.size = 6,
                    label.size = 4,
-                   colours = c("#FF5A5F", "#FFB400"),
+                   colours = c("#4045FF", "#FFB400"),
                    legend.title="",
                    legend.text.size = 7,
                    legend.labels=c("Perf1 (left)", "Perf2 (right)")) 
@@ -108,6 +108,16 @@ ggtext <- function(plot.data,
     return(result);
   }
   
+  GenerateHelpLineCoordinates <- function(maximumX, maximumY) {
+    result <- NULL;
+    
+    for (i in 1:maximumY) {
+      result <- rbind(result, data.frame(x=-maximumX, y=i, xend=maximumX, yend=i))
+    }
+    
+    return(result);
+  }
+  
   graphics.off();
   
   plots <- list();
@@ -136,10 +146,10 @@ ggtext <- function(plot.data,
           legend.key=element_rect(linetype="blank"))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=3.25, y=0);
-  leftArrowPos <- data.frame(x=0, y=0, xend=-3, yend=0);
-  rightArrowPos <- data.frame(x=0, y=0, xend=3, yend=0);
-  minusPos <- data.frame(x=-3.25, y=0);
+  plusPos <- data.frame(x=2.2, y=0);
+  leftArrowPos <- data.frame(x=0, y=0, xend=-1.8, yend=0);
+  rightArrowPos <- data.frame(x=0, y=0, xend=1.8, yend=0);
+  minusPos <- data.frame(x=-2.2, y=0);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
@@ -167,8 +177,12 @@ ggtext <- function(plot.data,
   minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
   minLabel <- data.frame(x=2, y=-maximumY, label="-");
   
+  # Help lines on the y-axis
+  helpLineCoords <- GenerateHelpLineCoordinates(maximumY, maximumX);
+  
   linePlot <- ggplot(data=lineData) + theme_clear;
   linePlot <- linePlot + 
+    geom_segment(data=helpLineCoords, mapping=aes(x=x, y=y, xend=xend, yend=yend), colour="gray") + # add help lines in the background
     # Maximim, middle and minimum line and the according labels
     geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="lightgreen") +
     geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="gray") +
@@ -179,7 +193,7 @@ ggtext <- function(plot.data,
     geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group), shape=21, fill="white", size=group.point.size) +
     geom_point(data=nonZero,aes(x=x,y=y, colour=colour, group=group), size=group.point.size) +
     scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
-    theme(plot.margin = unit(c(1,10,1,10), "lines")); # Make room for the grobs
+    theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
   
   # Include the legend
   linePlot  <- linePlot + labs(colour=legend.title,size=legend.text.size) +
@@ -195,7 +209,7 @@ ggtext <- function(plot.data,
 
   for (j in 1:length(allTerms[[1]]$label)) {
     tmpLabel <- allTerms[[1]]$label[j];
-    xCoord <- maximumY + 0.025
+    xCoord <- maximumY + 0.03
 
     xCoord <- -xCoord;
     
@@ -215,7 +229,7 @@ ggtext <- function(plot.data,
   counter <- length(allTerms[[2]]$label);
   for (j in 1:length(allTerms[[2]]$label)) {
     tmpLabel <- allTerms[[2]]$label[j];
-    xCoord <- maximumY + 0.025;
+    xCoord <- maximumY + 0.03;
     
     yCoord <- counter;
     counter <- counter - 1;

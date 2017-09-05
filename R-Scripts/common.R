@@ -19,15 +19,15 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
       right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE);
       if (doRecursiveCall) {
         if (rightAlign) {
-          result <- paste(paste(left, "×", sep=""), right, sep="\n");
+          result <- paste(paste(left, " ×", sep=""), right, sep="\n");
         } else {
-          result <- paste(left, paste("×", right, sep=""), sep="\n");
+          result <- paste(left, paste("× ", right, sep=""), sep="\n");
         }
       } else {
         if (rightAlign) {
-          result <- paste(paste(left, "×", sep=""), "\n", right, "  ", sep="");
+          result <- paste(paste(left, " ×", sep=""), "\n", right, "   ", sep="");
         } else {
-          result <- paste("  ", left, "\n", paste("×", right, sep=""), sep="");
+          result <- paste("   ", left, "\n", paste("× ", right, sep=""), sep="");
         }
       }
       found <- TRUE;
@@ -78,7 +78,7 @@ breakText <- function(text, rightAlign=FALSE) {
   #   minimumLengthToSplit: the minimum length for the text to split
   result <- c();
   for (i in 1:length(text)) {
-    result <- c(result, breakLine(text[i], rightAlign=rightAlign));
+    result <- c(result, breakLine(prepareLine(text[i]), rightAlign=rightAlign));
   }
   return(result);
 }
