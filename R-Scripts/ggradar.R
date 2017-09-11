@@ -41,13 +41,14 @@ ggradar <- function(plot.data,
                              legend.title="",
                              plot.title="",
                              legend.text.size=grid.label.size,
-                             line.offset = 0.5) {
+                             line.offset = 0.5,
+                             pathOfSourceFiles) {
 
   library(ggplot2)
   # Retrieve the location of the script
-  script.dir <- dirname(sys.frame(1)$ofile)
+  #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
-  source(paste(script.dir, "common.R", sep="/"))
+  source(paste(pathOfSourceFiles, "common.R", sep=""))
 
   plot.data <- as.data.frame(plot.data)
 

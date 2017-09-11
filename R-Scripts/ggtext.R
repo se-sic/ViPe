@@ -11,7 +11,8 @@ ggtext <- function(plot.data,
                    colours = c("#4045FF", "#FFB400"),
                    legend.title="",
                    legend.text.size = 7,
-                   legend.labels=c("Perf1 (left)", "Perf2 (right)")) 
+                   legend.labels=c("Perf1 (left)", "Perf2 (right)"),
+                   pathOfSourceFiles) 
 {
   # PREPARATION
   
@@ -21,9 +22,9 @@ ggtext <- function(plot.data,
   library(grid)
   
   # Retrieve the location of the script
-  script.dir <- dirname(sys.frame(1)$ofile)
+  #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
-  source(paste(script.dir, "common.R", sep="/"))
+  source(paste(pathOfSourceFiles, "common.R", sep=""))
   
   plot.data <- as.data.frame(plot.data)
   
@@ -250,8 +251,8 @@ ggtext <- function(plot.data,
   
   plots <- c(plots, list(gt));
   
-  grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
-  browser();
+  p <- grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
+  ggsave("TextPlot.pdf", height=8.5, width=11, p);
   
   dev.off();
   graphics.off();

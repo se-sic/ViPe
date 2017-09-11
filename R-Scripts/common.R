@@ -40,6 +40,37 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
   return(result);
 }
 
+getExponent <- function(exponent) {
+  result <- "";
+  divFactor <- 10;
+  repeat {
+    
+    rest <- exponent %% divFactor;
+    
+    toAdd <- switch (rest+1,
+                    "°",
+                    "¹",
+                    "²",
+                    "³",
+                    "4",
+                    "5",
+                    "6",
+                    "7",
+                    "8",
+                    "9"
+                    )
+    result <- paste(toAdd, result, sep="")
+    
+    if (floor(exponent / divFactor) == 0) {
+      break;
+    } else {
+      exponent <- exponent / divFactor;
+    }
+  }
+  
+  return(result);
+}
+
 prepareLine <- function(line) {
   #
   
@@ -61,7 +92,8 @@ prepareLine <- function(line) {
     name <- names(counter)[i];
     result <- paste(result, name, sep="");
     if (counter[[name]] > 1) {
-      result <- paste(result, "^", counter[[name]] , sep="");
+      #result <- paste(result, "^", counter[[name]] , sep="");
+      result <- paste(result, getExponent(counter[[name]]), sep="");
     }
     if (i < length(names(counter))) {
       result <- paste(result, "*", sep="");
