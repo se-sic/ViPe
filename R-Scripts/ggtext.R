@@ -119,6 +119,16 @@ ggtext <- function(plot.data,
     return(result);
   }
   
+GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
+  result <- NULL;
+  
+  for (i in seq(ymin, ymax, by=2)) {
+    result <- rbind(result, data.frame(xmin=xmin, xmax=xmax, ymin=max(ymin, i - 0.5), ymax=min(ymax, i + 0.5)))
+  }
+  
+  return(result);
+}
+  
   graphics.off();
   
   plots <- list();
@@ -178,16 +188,28 @@ ggtext <- function(plot.data,
   minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
   minLabel <- data.frame(x=2, y=-maximumY, label="-");
   
-  # Help lines on the y-axis
-  helpLineCoords <- GenerateHelpLineCoordinates(maximumY, maximumX);
+  # Retrieve rectangle data
+  negRect <- data.frame(xmin=-1, xmax=0, ymin=1, ymax=maximumX);
+  posRect <- data.frame(xmin=0, xmax=1, ymin=1, ymax=maximumX);
   
+  # Help lines on the y-axis
+  #helpLineCoords <- GenerateHelpLineCoordinates(maximumY, maximumX);
+  
+  # Help bars on the y-axis
+  helpBarCoords <- GenerateVerticalBarCoordinates(-1, 1, 1, maximumX);
+
   linePlot <- ggplot(data=lineData) + theme_clear;
   linePlot <- linePlot + 
-    geom_segment(data=helpLineCoords, mapping=aes(x=x, y=y, xend=xend, yend=yend), colour="gray") + # add help lines in the background
+    #geom_segment(data=helpLineCoords, mapping=aes(x=x, y=y, xend=xend, yend=yend), colour="gray") + # add help lines in the background
+    # Add the green and red backgroud colour
+    geom_rect(data=negRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="indianred1", alpha=0.5) +
+    geom_rect(data=posRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="lightgreen", alpha=0.5) +
+    # Add the vertical bars
+    geom_rect(data=helpBarCoords, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="gray", alpha=0.4) +
     # Maximim, middle and minimum line and the according labels
-    geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="lightgreen") +
-    geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="gray") +
-    geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="indianred1") +
+    geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
+    geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
+    geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
     
     geom_path(data=lineData, mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
     
