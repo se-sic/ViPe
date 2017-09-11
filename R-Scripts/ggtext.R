@@ -10,7 +10,7 @@ ggtext <- function(plot.data,
                    label.size = 4,
                    colours = c("#4045FF", "#FFB400"),
                    legend.title="",
-                   legend.text.size = 7,
+                   legend.text.size = text.size,
                    legend.labels=c("Perf1 (left)", "Perf2 (right)"),
                    pathOfSourceFiles) 
 {
@@ -123,7 +123,7 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   result <- NULL;
   
   for (i in seq(ymin, ymax, by=2)) {
-    result <- rbind(result, data.frame(xmin=xmin, xmax=xmax, ymin=max(ymin, i - 0.5), ymax=min(ymax, i + 0.5)))
+    result <- rbind(result, data.frame(xmin=xmin, xmax=xmax, ymin=i - 0.5, ymax=i + 0.5))
   }
   
   return(result);
@@ -157,10 +157,10 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
           legend.key=element_rect(linetype="blank"))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=2.2, y=0);
+  plusPos <- data.frame(x=2.3, y=0);
   leftArrowPos <- data.frame(x=0, y=0, xend=-1.8, yend=0);
   rightArrowPos <- data.frame(x=0, y=0, xend=1.8, yend=0);
-  minusPos <- data.frame(x=-2.2, y=0);
+  minusPos <- data.frame(x=-2.3, y=0);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
@@ -179,18 +179,18 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   
   maximumX <- max(lineData[,1]);
   maximumY <- max(abs(lineData[,2]));
-  maxLine <- rbind(data.frame(x=1, y=maximumY), data.frame(x=maximumX, y=maximumY));
+  maxLine <- rbind(data.frame(x=0.5, y=maximumY), data.frame(x=maximumX + 0.5, y=maximumY));
   maxLabel <- data.frame(x=2, y=maximumY, label="+");
   
-  midLine <- rbind(data.frame(x=1, y=0), data.frame(x=maximumX, y=0));
+  midLine <- rbind(data.frame(x=0.5, y=0), data.frame(x=maximumX + 0.5, y=0));
   midLabel <- data.frame(x=2, y=0, label="0");
   
-  minLine <- rbind(data.frame(x=1, y=-maximumY), data.frame(x=maximumX, y=-maximumY));
+  minLine <- rbind(data.frame(x=0.5, y=-maximumY), data.frame(x=maximumX + 0.5, y=-maximumY));
   minLabel <- data.frame(x=2, y=-maximumY, label="-");
   
   # Retrieve rectangle data
-  negRect <- data.frame(xmin=-1, xmax=0, ymin=1, ymax=maximumX);
-  posRect <- data.frame(xmin=0, xmax=1, ymin=1, ymax=maximumX);
+  negRect <- data.frame(xmin=-1, xmax=0, ymin=0.5, ymax=maximumX + 0.5);
+  posRect <- data.frame(xmin=0, xmax=1, ymin=0.5, ymax=maximumX + 0.5);
   
   # Help lines on the y-axis
   #helpLineCoords <- GenerateHelpLineCoordinates(maximumY, maximumX);

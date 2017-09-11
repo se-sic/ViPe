@@ -40,7 +40,7 @@ ggradar <- function(plot.data,
                              plot.legend=if (nrow(plot.data)>1) TRUE else FALSE,
                              legend.title="",
                              plot.title="",
-                             legend.text.size=grid.label.size,
+                             legend.text.size=9,
                              line.offset = 0.5,
                              pathOfSourceFiles) {
 
