@@ -44,7 +44,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles) {
   
   source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
   ggtext(performanceModels, text.font = "sans", text.size=12, pathOfSourceFiles = pathOfSourceFiles)
-  source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
-  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, font.radar = "sans", legend.title = "Performance Models", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles)
-  ggsave("StarPlot.pdf", height=8.5, width=11, p)
+  #source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
+  #p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, font.radar = "sans", legend.title = "Performance Models", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles)
+  #ggsave("StarPlot.pdf", height=8.5, width=11, p)
 }

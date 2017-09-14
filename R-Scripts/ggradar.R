@@ -306,6 +306,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   base <- base + theme(legend.key.width=unit(3,"line")) + theme(text = element_text(size = 20,
                                                                                       family = font.radar)) +
   theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
+  theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
   theme(legend.key.height=unit(2,"line")) +
   scale_colour_manual(values=rep(c("#4045FF", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
     "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +

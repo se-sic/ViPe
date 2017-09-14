@@ -129,6 +129,64 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   
   return(result);
 }
+
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
+  fileConn <- file(filePath);
+  content <- c(
+    "\\documentclass{standalone}",
+    "",
+    "\\usepackage{tikz}",
+    "\\usepackage{graphicx}",
+    "\\usetikzlibrary{positioning, calc}",
+    "", 
+    "\\begin{document}",
+    "\t\\newcommand{\\picWidth}{100px}",
+    "\t\\newcommand{\\picHeight}{375px}",
+    "\t\\newcommand{\\topOffset}{-0.57}",
+    "\t\\newcommand{\\leftOffset}{0.12}",
+    "\t\\newcommand{\\plotWidth}{3.21}",
+    "\t\\newcommand{\\plotHeight}{11.43}",
+    "\t\\newcommand{\\margin}{0.13}",
+    "",
+    "\t\\newcommand{\\textsize}{\\tiny}",
+    "",
+    "\t\\begin{tikzpicture}[every node/.append style={text=black, font=\\textsize}]",
+    paste("\t\t\\node[inner sep=0, anchor=north west] (centralImage) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep ="")
+  );
+  
+  for (i in 1:length(allTerms)) {
+    maxLength <- length(allTerms[[i]]$label);
+    
+    if (i == 1) {
+      nodeProp <- "anchor=east, align=right";
+      xCoord <- "\\leftOffset - \\margin";
+    } else {
+      nodeProp <- "anchor=west, align=left";  
+      xCoord <- "\\leftOffset + \\plotWidth + \\margin"
+    }
+    
+    yCoord <- paste("\\topOffset - \\plotHeight / ", maxLength * 2, sep="");
+    
+    for (j in 1:maxLength) {
+      multiplicationFactor <- 1 + 2*(j-1);
+      if (allTerms[[i]]$label[j] != "") {
+        content <- c(content, c(
+          paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (", xCoord, ", ", yCoord, " * ", multiplicationFactor, ") {$", allTerms[[i]]$label[j], "$};", sep="")
+        ));
+      }
+    }
+  }
+  
+  
+  content <- c(content, c(
+    "\t\\end{tikzpicture}",
+    "\\end{document}"
+  ));
+  
+  writeLines(content, fileConn);
+  
+  close(fileConn);
+}
   
   graphics.off();
   
@@ -277,8 +335,10 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   
   #p <- grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
   #ggsave("TextPlot.pdf", height=8.5, width=11, p);
-  ggsave("TextPlot_1.pdf", height=0.7, width=4, leftRightArrow)
-  ggsave("TextPlot_2.pdf", height=15, width=4, linePlot)
+  #ggsave("TextPlot_1.pdf", height=0.7, width=4, leftRightArrow)
+  
+  ggsave("TextPlot_1.pdf", height=15, width=4, linePlot)
+  GenerateTexFile("TextPlot.tex", "TextPlot_1.pdf", allTerms)
   
   dev.off();
   graphics.off();

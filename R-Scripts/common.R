@@ -9,6 +9,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
   #   line: the line to split
   #   minimumLengthToSplit: the minimum length to split the line
   #   doRecursiveCall: a flag if recursive calls with smaller minimum lengths should be triggered
+  timeSymbol <- "\\times"
   result <- "";
   i <- 1;
   found <- FALSE;
@@ -19,15 +20,15 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
       right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE);
       if (doRecursiveCall) {
         if (rightAlign) {
-          result <- paste(paste(left, " x", sep=""), right, sep="\n");
+          result <- paste(paste(left, "", timeSymbol, sep=""), right, sep="$\\\\$");
         } else {
-          result <- paste(left, paste("x ", right, sep=""), sep="\n");
+          result <- paste(left, paste(timeSymbol, " ", right, sep=""), sep="$\\\\$");
         }
       } else {
         if (rightAlign) {
-          result <- paste(paste(left, " x", sep=""), "\n", right, "   ", sep="");
+          result <- paste(paste(left, "", timeSymbol, sep=""), "$\\\\$", right, "$\\phantom{$", timeSymbol, "$}$ ", sep="");
         } else {
-          result <- paste("   ", left, "\n", paste("x ", right, sep=""), sep="");
+          result <- paste("\\phantom{", timeSymbol, "}", left, "$\\\\$", paste(timeSymbol, " ", right, sep=""), sep="");
         }
       }
       found <- TRUE;
@@ -35,7 +36,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
     i <- i + 1;
   }
   if (result == "") {
-    return(line);
+    return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
   }
   return(result);
 }
@@ -48,7 +49,7 @@ getExponent <- function(exponent) {
     rest <- exponent %% divFactor;
     
     toAdd <- switch (rest+1,
-                    "°",
+                    "0",
                     "1",
                     "2",
                     "3",
@@ -67,6 +68,8 @@ getExponent <- function(exponent) {
       exponent <- exponent / divFactor;
     }
   }
+  
+  result <- paste("^{", result, "}", sep="")
   
   return(result);
 }
