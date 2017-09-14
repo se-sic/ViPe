@@ -4,7 +4,7 @@
 #' @export ggtext
 
 breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
-  #Breaks a line at the given minimum length if a certain symbol ('·') is parsed
+  #Breaks a line at the given minimum length if a certain symbol ('?') is parsed
   #Args:
   #   line: the line to split
   #   minimumLengthToSplit: the minimum length to split the line
@@ -19,15 +19,15 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
       right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE);
       if (doRecursiveCall) {
         if (rightAlign) {
-          result <- paste(paste(left, " ×", sep=""), right, sep="\n");
+          result <- paste(paste(left, " x", sep=""), right, sep="\n");
         } else {
-          result <- paste(left, paste("× ", right, sep=""), sep="\n");
+          result <- paste(left, paste("x ", right, sep=""), sep="\n");
         }
       } else {
         if (rightAlign) {
-          result <- paste(paste(left, " ×", sep=""), "\n", right, "   ", sep="");
+          result <- paste(paste(left, " x", sep=""), "\n", right, "   ", sep="");
         } else {
-          result <- paste("   ", left, "\n", paste("× ", right, sep=""), sep="");
+          result <- paste("   ", left, "\n", paste("x ", right, sep=""), sep="");
         }
       }
       found <- TRUE;
@@ -48,10 +48,10 @@ getExponent <- function(exponent) {
     rest <- exponent %% divFactor;
     
     toAdd <- switch (rest+1,
-                    "°",
-                    "¹",
-                    "²",
-                    "³",
+                    "Â°",
+                    "1",
+                    "2",
+                    "3",
                     "4",
                     "5",
                     "6",
@@ -104,7 +104,7 @@ prepareLine <- function(line) {
 }
 
 breakText <- function(text, rightAlign=FALSE) {
-  #Breaks the given text at the minimum length if a certain symbole ('·') is parsed
+  #Breaks the given text at the minimum length if a certain symbole ('?') is parsed
   #Args:
   #   text: the text to break
   #   minimumLengthToSplit: the minimum length for the text to split

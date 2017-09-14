@@ -20,6 +20,7 @@ ggtext <- function(plot.data,
   library(ggplot2)
   library(gridExtra)
   library(grid)
+  library(cowplot)
   
   # Retrieve the location of the script
   #script.dir <- dirname(sys.frame(1)$ofile)
@@ -157,10 +158,10 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
           legend.key=element_rect(linetype="blank"))
   
   # Add the leftrightarrow with the plus and minus sign
-  plusPos <- data.frame(x=2.3, y=0);
-  leftArrowPos <- data.frame(x=0, y=0, xend=-1.8, yend=0);
-  rightArrowPos <- data.frame(x=0, y=0, xend=1.8, yend=0);
-  minusPos <- data.frame(x=-2.3, y=0);
+  plusPos <- data.frame(x=5, y=0);
+  leftArrowPos <- data.frame(x=0, y=0, xend=-4.5, yend=0);
+  rightArrowPos <- data.frame(x=0, y=0, xend=4.5, yend=0);
+  minusPos <- data.frame(x=-5, y=-0.7);
   anchorPos <- rbind(data.frame(x=5,y=5), data.frame(x=-5, y=-2));
   leftRightArrow <- ggplot() + theme_clear +
     geom_segment(data=leftArrowPos, mapping=aes(x=x, y=y, xend=xend, yend=yend), size=1, colour="black", arrow=arrow(length = unit(0.5, "cm"))) +
@@ -198,12 +199,12 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   # Help bars on the y-axis
   helpBarCoords <- GenerateVerticalBarCoordinates(-1, 1, 1, maximumX);
 
-  linePlot <- ggplot(data=lineData) + theme_clear;
+  linePlot <- ggplot(data=lineData) + theme_nothing();
   linePlot <- linePlot + 
     #geom_segment(data=helpLineCoords, mapping=aes(x=x, y=y, xend=xend, yend=yend), colour="gray") + # add help lines in the background
     # Add the green and red backgroud colour
-    geom_rect(data=negRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="indianred1", alpha=0.5) +
-    geom_rect(data=posRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="lightgreen", alpha=0.5) +
+    geom_rect(data=negRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="indianred1", alpha=0.25) +
+    geom_rect(data=posRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="lightgreen", alpha=0.25) +
     # Add the vertical bars
     geom_rect(data=helpBarCoords, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="gray", alpha=0.4) +
     # Maximim, middle and minimum line and the according labels
@@ -215,8 +216,8 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
     
     geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group), shape=21, fill="white", size=group.point.size) +
     geom_point(data=nonZero,aes(x=x,y=y, colour=colour, group=group), size=group.point.size) +
-    scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
-    theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
+    scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) #+
+    #theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
   
   # Include the legend
   linePlot  <- linePlot + labs(colour=legend.title,size=legend.text.size) +
@@ -225,56 +226,59 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
     theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
     theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
     theme(legend.key.height=unit(2,"line")) +
-    theme(text=element_text(family=text.font))
+    theme(text=element_text(family=text.font)) +
+    labs(x=NULL, y=NULL)
   
-  # Add the text on the left and the right side, respectively
-  counter <- length(allTerms[[1]]$label);
-
-  for (j in 1:length(allTerms[[1]]$label)) {
-    tmpLabel <- allTerms[[1]]$label[j];
-    xCoord <- maximumY + 0.03
-
-    xCoord <- -xCoord;
-    
-    yCoord <- counter;
-    counter <- counter - 1;
-    
-    linePlot <- linePlot + 
-      annotation_custom(
-        grob = textGrob(label = allTerms[[1]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
-        ymin = yCoord,      # Vertical position of the textGrob
-        ymax = yCoord,
-        xmin = xCoord,         # Note: The grobs are positioned outside the plot area
-        xmax = xCoord)
-  }
+  # # Add the text on the left and the right side, respectively
+  # counter <- length(allTerms[[1]]$label);
+  # 
+  # for (j in 1:length(allTerms[[1]]$label)) {
+  #   tmpLabel <- allTerms[[1]]$label[j];
+  #   xCoord <- maximumY + 0.03
+  # 
+  #   xCoord <- -xCoord;
+  #   
+  #   yCoord <- counter;
+  #   counter <- counter - 1;
+  #   
+  #   linePlot <- linePlot + 
+  #     annotation_custom(
+  #       grob = textGrob(label = allTerms[[1]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
+  #       ymin = yCoord,      # Vertical position of the textGrob
+  #       ymax = yCoord,
+  #       xmin = xCoord,         # Note: The grobs are positioned outside the plot area
+  #       xmax = xCoord)
+  # }
   
   
-  counter <- length(allTerms[[2]]$label);
-  for (j in 1:length(allTerms[[2]]$label)) {
-    tmpLabel <- allTerms[[2]]$label[j];
-    xCoord <- maximumY + 0.03;
-    
-    yCoord <- counter;
-    counter <- counter - 1;
-    
-    linePlot <- linePlot + 
-      annotation_custom(
-        grob = textGrob(label = allTerms[[2]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
-        ymin = yCoord,      # Vertical position of the textGrob
-        ymax = yCoord,
-        xmin = xCoord,         # Note: The grobs are positioned outside the plot area
-        xmax = xCoord)
-    
-  }
+  # counter <- length(allTerms[[2]]$label);
+  # for (j in 1:length(allTerms[[2]]$label)) {
+  #   tmpLabel <- allTerms[[2]]$label[j];
+  #   xCoord <- maximumY + 0.03;
+  #   
+  #   yCoord <- counter;
+  #   counter <- counter - 1;
+  #   
+  #   linePlot <- linePlot + 
+  #     annotation_custom(
+  #       grob = textGrob(label = allTerms[[2]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
+  #       ymin = yCoord,      # Vertical position of the textGrob
+  #       ymax = yCoord,
+  #       xmin = xCoord,         # Note: The grobs are positioned outside the plot area
+  #       xmax = xCoord)
+  #   
+  # }
+  # 
+  # # Code to override clipping
+  # gt <- ggplot_gtable(ggplot_build(linePlot))
+  # gt$layout$clip[gt$layout$name == "panel"] <- "off"
   
-  # Code to override clipping
-  gt <- ggplot_gtable(ggplot_build(linePlot))
-  gt$layout$clip[gt$layout$name == "panel"] <- "off"
+  #plots <- c(plots, list(gt));
   
-  plots <- c(plots, list(gt));
-  
-  p <- grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
-  ggsave("TextPlot.pdf", height=8.5, width=11, p);
+  #p <- grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
+  #ggsave("TextPlot.pdf", height=8.5, width=11, p);
+  ggsave("TextPlot_1.pdf", height=0.7, width=4, leftRightArrow)
+  ggsave("TextPlot_2.pdf", height=15, width=4, linePlot)
   
   dev.off();
   graphics.off();

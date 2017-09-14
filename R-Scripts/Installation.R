@@ -3,6 +3,8 @@ install.packages("ggplot2")
 install.packages("gridExtra")
 install.packages("scales")
 
+install.packages("cowplot")
+
 # Install devtools for downloading the newest version of some packages
 install.packages("devtools")
 

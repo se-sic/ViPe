@@ -1,0 +1,26 @@
+\documentclass{standalone}
+
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{makecell}
+
+\begin{document}
+
+		\begin{tabular}{rcl}
+			& \includegraphics[scale=0.3]{../Examples/TextPlot_1.pdf} & \\
+			free space& \multirow{12}{*}{\includegraphics[height=350px]{../Examples/TextPlot_2.pdf}} & free space\vspace{5px}\\
+			$root$\phantom{$\times$}& &\phantom{$\times$}$root$\vspace{5px} \\
+			$NewRatio$\phantom{$\times$}\vspace{5px}& &\phantom{$\times$}$NewRatio$ \\
+			\makecell[r]{$NewRatio\times$\\$UseAdapativeSizePolicy$\phantom{$\times$}}\vspace{2px}& & \makecell[l]{\phantom{$\times$}$NewRatio$\\$\times UseAdapativeSizePolicy$} \\
+			\vspace{8px}$next$\phantom{$\times$}& & \\
+			\vspace{8px}$next$\phantom{$\times$}& & \\
+			\vspace{8px}\makecell[r]{$next\times$\\$\log (next)\times$\\$last$\phantom{$\times$}}& & \\
+			\vspace{8px}& & \\
+			\vspace{8px}& & \\
+			\vspace{8px}& & \\
+			\vspace{21px}& & \\
+			Legend $\rightarrow$& &$\leftarrow$ Legend\\
+			
+		\end{tabular}
+
+\end{document}
