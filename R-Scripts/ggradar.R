@@ -227,17 +227,17 @@ if (plot.legend==FALSE) theme_clear <- theme_clear + theme(legend.position="none
 
 #base layer = axis labels for axes to left of central y-axis [x< -(x.centre.range)]
 base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
-  geom_text(data=subset(axis$label,axis$label$x < (-x.centre.range)),
-            aes(x=x,y=y,label=text),size=axis.label.size,hjust=1, family=font.radar) +
+  #geom_text(data=subset(axis$label,axis$label$x < (-x.centre.range)),
+  #          aes(x=x,y=y,label=text),size=axis.label.size,hjust=1, family=font.radar) +
   scale_x_continuous(limits=c(-2.5*plot.extent.x,2.5*plot.extent.x)) + 
   scale_y_continuous(limits=c(-1.5*plot.extent.y,1.5*plot.extent.y))
 
   # + axis labels for any vertical axes [abs(x)<=x.centre.range]
-  base <- base + geom_text(data=subset(axis$label,abs(axis$label$x)<=x.centre.range),
-                           aes(x=x,y=y,label=text),size=axis.label.size,hjust=0.5, family=font.radar)
+  #base <- base + geom_text(data=subset(axis$label,abs(axis$label$x)<=x.centre.range),
+  #                         aes(x=x,y=y,label=text),size=axis.label.size,hjust=0.5, family=font.radar)
   # + axis labels for any vertical axes [x>x.centre.range]
-  base <- base + geom_text(data=subset(axis$label,axis$label$x>x.centre.range),
-                           aes(x=x,y=y,label=text),size=axis.label.size,hjust=0, family=font.radar)
+  #base <- base + geom_text(data=subset(axis$label,axis$label$x>x.centre.range),
+  #                         aes(x=x,y=y,label=text),size=axis.label.size,hjust=0, family=font.radar)
 
   # + theme_clear [to remove grey plot background, grid lines, axis tick marks and axis text]
   base <- base + theme_clear
