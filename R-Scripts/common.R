@@ -3,7 +3,7 @@
 #' @author Christian Kaltenecker
 #' @export ggtext
 
-breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
+breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrecedingPhantom = TRUE) {
   #Breaks a line at the given minimum length if a certain symbol ('?') is parsed
   #Args:
   #   line: the line to split
@@ -13,11 +13,12 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
   result <- "";
   i <- 1;
   found <- FALSE;
+  
   while (i <= nchar(line) && !found) {
     character <- substring(line, i, i);
     if (character == '*') {
       left <- substring(line,0,i-1);
-      right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE);
+      right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE, includePrecedingPhantom);
       if (doRecursiveCall) {
         if (rightAlign) {
           result <- paste(paste(left, "", timeSymbol, sep=""), right, sep="$\\\\$");
@@ -35,8 +36,20 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE) {
     }
     i <- i + 1;
   }
-  if (result == "") {
-    return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
+  if (result == "" && !doRecursiveCall && includePrecedingPhantom) {
+      return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
+    
+  } else if (result == "") {
+    if (!doRecursiveCall) {
+      # Replace log-function
+      line <- gsub("log(", "\\log(", line, fixed=TRUE)
+    }
+    return(line);
+  }
+  
+  if (!doRecursiveCall) {
+    # Replace log-function
+    result <- gsub("log(", "\\log(", result, fixed=TRUE)
   }
   return(result);
 }
@@ -106,14 +119,14 @@ prepareLine <- function(line) {
   return(result);
 }
 
-breakText <- function(text, rightAlign=FALSE) {
+breakText <- function(text, rightAlign=FALSE, includePreceedingPhantom=TRUE) {
   #Breaks the given text at the minimum length if a certain symbole ('?') is parsed
   #Args:
   #   text: the text to break
   #   minimumLengthToSplit: the minimum length for the text to split
   result <- c();
   for (i in 1:length(text)) {
-    result <- c(result, breakLine(prepareLine(text[i]), rightAlign=rightAlign));
+    result <- c(result, breakLine(prepareLine(text[i]), rightAlign=rightAlign, includePrecedingPhantom = includePreceedingPhantom));
   }
   return(result);
 }

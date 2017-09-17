@@ -131,7 +131,6 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
 }
 
 GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
-  fileConn <- file(filePath);
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -182,6 +181,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "\t\\end{tikzpicture}",
     "\\end{document}"
   ));
+  
+  fileConn <- file(filePath);
   
   writeLines(content, fileConn);
   

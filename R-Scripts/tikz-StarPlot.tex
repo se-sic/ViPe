@@ -9,16 +9,29 @@
 	\newcommand{\picHeight}{400px}
 	\newcommand{\picWidth}{520px}
 	
-	\newcommand{\radius}{3.1}
-	\newcommand{\lineOffset}{def}
-	
-	\newcommand{\textsize}{\tiny}
-	
 	\newcommand{\PI}{3.141592}
+	
+	\newcommand{\centerX}{9.22};
+	\newcommand{\centerY}{-6.4}
+	\newcommand{\radius}{3.1}
+	\newcommand{\lineOffset}{0.7}
+	\newcommand{\textsize}{\tiny}
+	\newcommand{\offset}{0.2}
+	
+	\newcommand{\angleDiff}{360 / 10}
+	
+	
+	\pgfmathsetmacro\ax{\centerX + (\radius + \lineOffset) * sin(\angleDiff * 2) + \offset}
+	\pgfmathsetmacro\ay{\centerY + (\radius + \lineOffset) * cos(\angleDiff * 2)}
 	
 	\begin{tikzpicture}
 		\node[inner sep=0, anchor=north west] (pic) at (0,0) {\includegraphics[width=\picWidth, height=\picHeight]{../Examples/StarPlot_1.pdf}};
-		\node[inner sep=0, anchor=north west] at (9.2,-6.4) {1};
-		\node[inner sep=0, anchor=north west] at (9.2,-3.3) {3};
+		\node[inner sep=0, anchor=north west] at (\centerX, \centerY) {1};
+		\node[inner sep=0, anchor=north west] at (\centerX,\centerY + \radius) {3};
+		\node[inner sep=0, anchor=north west] at (\centerX,\centerY + \radius + \lineOffset) {4};
+		
+		\node[inner sep=0, anchor=west] at (\ax, \ay) {1};
+		\node[inner sep=0, anchor=north west] at (\centerX,\centerY - \radius - \lineOffset) {4};
+		
 	\end{tikzpicture}
 \end{document}

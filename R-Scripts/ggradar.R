@@ -144,6 +144,104 @@ funcCircleCoords <- function(center = c(0,0), r = 1, npoints = 100){
   return(data.frame(x = xx, y = yy))
 }
 
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
+  content <- c(
+    "\\documentclass{standalone}",
+    "",
+    "\\usepackage{graphicx}",
+    "\\usepackage{tikz}",
+    "\\usetikzlibrary{positioning, calc}",
+    "",
+    "",
+    "\\begin{document}",
+    "\t\\newcommand{\\picHeight}{400px}",
+    "\t\\newcommand{\\picWidth}{520px}",
+    "",
+    "\t\\newcommand{\\PI}{3.141592}",
+    "",
+    "\t\\newcommand{\\centerX}{9.22}",
+    "\t\\newcommand{\\centerY}{-6.4}",
+    "\t\\newcommand{\\radius}{3.1}",
+    "\t\\newcommand{\\lineOffset}{0.7}",
+    "\t\\newcommand{\\textsize}{\\tiny}",
+    "\t\\newcommand{\\offset}{0.2}",
+    ""
+  );
+  
+  # Create pgf macros for the coordinates
+  numberLabels <- length(allTerms);
+  
+  content <- c(content, 
+               c(
+                 paste("\t\\newcommand{\\angleDiff}{360 / ", numberLabels, "}", sep ="")
+               ))
+  
+  prefixes <- c(letters, LETTERS);
+  
+  for (i in 1:numberLabels) {
+    xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x{\\centerX + (\\radius + \\lineOffset) * sin(\\angleDiff * ", i - 1, ")", sep="");
+    yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y{\\centerY + (\\radius + \\lineOffset) * cos(\\angleDiff * ", i - 1, ")", sep="");
+    
+    
+    if (i == 1) {
+      yCoordinateLabel <- paste(yCoordinateLabel, " + \\offset", sep="")
+    } else if ((i - 1) == numberLabels / 2) {
+      yCoordinateLabel <- paste(yCoordinateLabel, " - \\offset", sep="")
+    } else if ((i - 1) < numberLabels / 2) {
+      xCoordinateLabel <- paste(xCoordinateLabel, " + \\offset", sep="")
+    } else {
+      xCoordinateLabel <- paste(xCoordinateLabel, " - \\offset", sep="")
+    }
+
+    xCoordinateLabel <- paste(xCoordinateLabel, "}", sep="")
+    yCoordinateLabel <- paste(yCoordinateLabel, "}", sep="")
+    
+    content <- c(content, 
+                 c(
+                   xCoordinateLabel,
+                   yCoordinateLabel
+                 ))
+  }
+  
+  
+  content <- c(content,
+               c(
+                 "",
+                 "\t\\begin{tikzpicture}",
+                 paste("\t\t\\node[inner sep=0, anchor=north west] (pic) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep="")
+               ));
+  
+  for (i in 1:numberLabels) {
+    if (i == 1) {
+      nodeProp <- "anchor=south"
+    } else if ((i - 1) == numberLabels / 2) {
+      nodeProp <- "anchor=north"
+    } else if ((i - 1) < numberLabels / 2) {
+      nodeProp <- "anchor=west, align=left"
+    } else {
+      nodeProp <- "anchor=east, align=right"
+    }
+    
+    content <- c(content, 
+                 c(
+                   paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
+                 ))
+  }
+  
+  
+  content <- c(content, 
+               c("\t\\end{tikzpicture}",
+                "\\end{document}"
+               ));
+  
+  
+  fileConn <- file(filePath);
+  
+  writeLines(content, fileConn);
+  
+  close(fileConn);
+}
+
 ### Convert supplied data into plottable format
   # (a) add abs(centre.y) to supplied plot data 
   #[creates plot centroid of 0,0 for internal use, regardless of min. value of y
@@ -167,7 +265,7 @@ funcCircleCoords <- function(center = c(0,0), r = 1, npoints = 100){
   # Split the labels of the axis for alignment
   splitLabels <- split(axis.labels, 1:2);
   
-  axis.labels <- c(breakText(splitLabels[[1]]), breakText(splitLabels[[2]], rightAlign=TRUE));
+  axis.labels <- c(breakText(splitLabels[[1]], includePreceedingPhantom=FALSE), breakText(splitLabels[[2]], rightAlign=TRUE, includePreceedingPhantom=FALSE));
   #print(axis$path)
   # (d) Create file containing axis labels + associated plotting coordinates
   #Labels
@@ -316,6 +414,8 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   if (plot.title != "") {
     base <- base + ggtitle(plot.title)
   }
+  
+  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text)
 
   return(base)
 
