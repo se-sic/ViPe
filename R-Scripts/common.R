@@ -2,6 +2,8 @@
 #' This script contains functions that are used by multiple scripts.
 #' @author Christian Kaltenecker
 #' @export ggtext
+#' 
+textEnvironment <- "\\textrm{"
 
 breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrecedingPhantom = TRUE) {
   #Breaks a line at the given minimum length if a certain symbol ('?') is parsed
@@ -18,18 +20,19 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
     character <- substring(line, i, i);
     if (character == '*') {
       left <- substring(line,0,i-1);
+      left <- paste(textEnvironment, left, "}", sep="")
       right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE, includePrecedingPhantom);
       if (doRecursiveCall) {
         if (rightAlign) {
-          result <- paste(paste(left, "", timeSymbol, sep=""), right, sep="$\\\\$");
+          result <- paste( left, timeSymbol, "$\\\\$", right, sep="");
         } else {
-          result <- paste(left, paste(timeSymbol, " ", right, sep=""), sep="$\\\\$");
+          result <- paste(left, "$\\\\$", timeSymbol, " ", right, sep="");
         }
       } else {
         if (rightAlign) {
-          result <- paste(paste(left, "", timeSymbol, sep=""), "$\\\\$", right, "$\\phantom{$", timeSymbol, "$}$ ", sep="");
+          result <- paste(left, timeSymbol, "$\\\\$", right, "$\\phantom{$", timeSymbol, "$}$ ", sep="");
         } else {
-          result <- paste("\\phantom{", timeSymbol, "}", left, "$\\\\$", paste(timeSymbol, " ", right, sep=""), sep="");
+          result <- paste("\\phantom{", timeSymbol, "}", left, "$\\\\$", timeSymbol, " ", right, sep="");
         }
       }
       found <- TRUE;
@@ -37,19 +40,25 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
     i <- i + 1;
   }
   if (result == "" && !doRecursiveCall && includePrecedingPhantom) {
+      line <- paste(textEnvironment, line, "}", sep="")
+      line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
+      line <- gsub(")", "})_{\\log}{", line, fixed=TRUE)
       return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
     
   } else if (result == "") {
+    line <- paste(textEnvironment, line, "}", sep="")
     if (!doRecursiveCall) {
       # Replace log-function
-      line <- gsub("log(", "\\log(", line, fixed=TRUE)
+      line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
+      line <- gsub(")", "})_{\\log}{", line, fixed=TRUE)
     }
     return(line);
   }
   
   if (!doRecursiveCall) {
     # Replace log-function
-    result <- gsub("log(", "\\log(", result, fixed=TRUE)
+    result <- gsub("log(", paste("}(", textEnvironment, sep=""), result, fixed=TRUE)
+    result <- gsub(")", "})_{\\log}{", result, fixed=TRUE)
   }
   return(result);
 }
@@ -82,7 +91,7 @@ getExponent <- function(exponent) {
     }
   }
   
-  result <- paste("^{", result, "}", sep="")
+  result <- paste("}^{", result, "}", textEnvironment, sep="")
   
   return(result);
 }

@@ -134,6 +134,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   content <- c(
     "\\documentclass{standalone}",
     "",
+    "\\usepackage{color}",
     "\\usepackage{tikz}",
     "\\usepackage{graphicx}",
     "\\usetikzlibrary{positioning, calc}",
@@ -143,14 +144,17 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "\t\\newcommand{\\picHeight}{375px}",
     "\t\\newcommand{\\topOffset}{-0.57}",
     "\t\\newcommand{\\leftOffset}{0.12}",
-    "\t\\newcommand{\\plotWidth}{3.21}",
+    "\t\\newcommand{\\plotWidth}{3.3}",
     "\t\\newcommand{\\plotHeight}{11.43}",
     "\t\\newcommand{\\margin}{0.13}",
     "",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "",
     "\t\\begin{tikzpicture}[every node/.append style={text=black, font=\\textsize}]",
-    paste("\t\t\\node[inner sep=0, anchor=north west] (centralImage) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep ="")
+    paste("\t\t\\node[inner sep=0, anchor=north west] (centralImage) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep =""),
+    "\t\\node[inner sep=0, anchor=south west, align=left] at (\\leftOffset, \\topOffset) {$-1$};",
+    "\t\\node[inner sep=0, anchor=south] at (\\leftOffset + \\plotWidth / 2, \\topOffset) {$0$};",
+    "\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftOffset + \\plotWidth, \\topOffset) {$1$};"
   );
   
   for (i in 1:length(allTerms)) {
@@ -273,20 +277,25 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     
     geom_path(data=lineData, mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
     
-    geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group), shape=21, fill="white", size=group.point.size) +
+    geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group, fill=I("white")), shape=21, size=group.point.size) +
     geom_point(data=nonZero,aes(x=x,y=y, colour=colour, group=group), size=group.point.size) +
-    scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) #+
+    scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
+    scale_fill_manual(name="", values=c("white"), labels=c("No occurence"))
+    #scale_fill_manual(name="Point", values=c(colours[1], colours[2], "white"), labels=c("", "", "No occurence")) #+
     #theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
   
   # Include the legend
-  linePlot  <- linePlot + labs(colour=legend.title,size=legend.text.size) +
-    theme(legend.key.width=unit(3,"line")) + theme(text = element_text(size = 20,
-                                                                                    family = text.font)) +
-    theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
-    theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
-    theme(legend.key.height=unit(2,"line")) +
+  linePlot  <- linePlot + 
+    labs(colour=legend.title,size=legend.text.size) +
+    theme(legend.key.width=unit(3,"line")) + 
+    theme(text = element_text(size = 20, family = text.font)) +
+    theme(legend.text = element_text(size =legend.text.size), legend.position="bottom") +
+    theme(legend.box.background = element_rect()) + #, legend.box.margin = margin(-2,-2,-2,-2)) + # add the box around the legend
+    theme(legend.key.height=unit(1,"line")) +
     theme(text=element_text(family=text.font)) +
-    labs(x=NULL, y=NULL)
+    #theme(legend.direction="horizontal")
+    labs(x=NULL, y=NULL) +
+    guides(colour=guide_legend(nrow=2,byrow=TRUE))
   
   # # Add the text on the left and the right side, respectively
   # counter <- length(allTerms[[1]]$label);

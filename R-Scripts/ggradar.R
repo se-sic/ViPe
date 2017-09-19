@@ -148,6 +148,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   content <- c(
     "\\documentclass{standalone}",
     "",
+    "\\usepackage{color}",
     "\\usepackage{graphicx}",
     "\\usepackage{tikz}",
     "\\usetikzlibrary{positioning, calc}",
@@ -160,7 +161,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "\t\\newcommand{\\PI}{3.141592}",
     "",
     "\t\\newcommand{\\centerX}{9.22}",
-    "\t\\newcommand{\\centerY}{-6.4}",
+    "\t\\newcommand{\\centerY}{-6.1}",
     "\t\\newcommand{\\radius}{3.1}",
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
@@ -377,7 +378,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   eqZero <- eqZero[group$path$val == 0,];
   
   # ... + group points (cluster data)
-  base <- base + geom_point(data=eqZero,aes(x=x,y=y,group=group,colour=group), shape=21, fill="white", size=group.point.size)
+  base <- base + geom_point(data=eqZero,aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)
   base <- base + geom_point(data=nonZero,aes(x=x,y=y,group=group,colour=group), size=group.point.size)
 
   #... + amend Legend title
@@ -408,6 +409,8 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   theme(legend.key.height=unit(2,"line")) +
   scale_colour_manual(values=rep(c("#4045FF", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
     "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +
+  scale_fill_manual(name="", values=c("white"), labels="No occurence") +
+  guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   theme(text=element_text(family=font.radar)) + 
   theme(legend.title=element_blank())
 
