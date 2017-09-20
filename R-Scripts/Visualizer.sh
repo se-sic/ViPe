@@ -11,12 +11,15 @@ function printUsage {
 if [[ "$#" -lt "2" || "$#" -gt "4"  ]]
 then
 	printUsage
-	exit
+	read -p "Press enter to continue...";
+	exit 0
 fi
 
 pathToCsvFiles="$1";
 
 pathToLibDir="$2";
+
+mkdir -p $pathToLibDir
 
 if [ "$#" -lt "3" ]
 then
