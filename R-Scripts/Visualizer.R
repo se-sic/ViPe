@@ -1,10 +1,12 @@
-visualize <- function(pathToExampleFiles, pathOfSourceFiles) {
-
-  library(ggplot2)
+visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary) {
+  
+  library("ggplot2", lib.loc=pathToLibrary)
+  library("labeling", lib.loc=pathToLibrary)
+  library("digest", lib.loc=pathToLibrary)
   #library(ggradar)
   
-  suppressPackageStartupMessages(library(dplyr))
-  library(scales)
+  suppressPackageStartupMessages(library("dplyr", lib.loc=pathToLibrary))
+  library("scales", lib.loc=pathToLibrary)
   
   # The path to the working directory
   #path <- "C:/Users/chris_000/Desktop/Uni/ViPe/Examples/"
@@ -43,8 +45,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles) {
   #colnames(performanceModels) <- gsub("?", "",colnames(performanceModels))
   
   source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
-  ggtext(performanceModels, text.font = "sans", text.size=12, pathOfSourceFiles = pathOfSourceFiles)
+  ggtext(performanceModels, text.font = "sans", text.size=12, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary)
   source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
-  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles)
+  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary)
   ggsave("StarPlot_1.pdf", height=8.5, width=11, p)
 }

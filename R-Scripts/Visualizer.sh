@@ -1,13 +1,14 @@
 #!/bin/bash
 
 function printUsage {
-	echo "Usage: ./Visualizer.sh <PathToDirectoryWithCsvFiles> [PathToRscript] [PathToScriptDirectory]";
+	echo "Usage: ./Visualizer.sh <PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PerformInstallation]";
 	echo "PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
-	echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows)";
-	echo "PathToScriptDirectory is the path to the directory where the scripts are stored."
+	echo "PathToLibDir is the path where the libraries should be stored.";
+	echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
+	echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
 }
 
-if [[ "$#" -lt "1" || "$#" -gt "3"  ]]
+if [[ "$#" -lt "2" || "$#" -gt "4"  ]]
 then
 	printUsage
 	exit
@@ -15,20 +16,47 @@ fi
 
 pathToCsvFiles="$1";
 
-if [ "$#" -lt "2" ]
-then
-	pathToRscript="Rscript"
-else 
-	pathToRscript="$2";
-fi
+pathToLibDir="$2";
 
 if [ "$#" -lt "3" ]
 then
-	
-else
+	pathToRscript="Rscript"
+else 
+	pathToRscript="$3";
 fi
-currentDirectory="$(pwd)"
-# BACH_SOURCE[0]
 
-echo $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}"
-$pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}"
+currentDirectory=`dirname $BASH_SOURCE`
+
+if [[ "$#" -eq "4" ]]
+then
+	# Perform installation
+	echo "$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
+	"$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
+fi
+
+if [ "$?" != "0" ]; then
+	echo "[Error] R-script execution failed while installing!";
+	read -p "Press enter to continue...";
+	exit 1
+fi
+
+# Execute the R-scripts and pass arguments to it
+echo $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}"
+"$pathToRscript" ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}"
+
+if [ "$?" != "0" ]; then
+	echo "[Error] R-script execution failed!";
+	read -p "Press enter to continue...";
+	exit 1
+fi
+# Now, invoke PDFLaTeX
+cd $pathToCsvFiles
+pdflatex StarPlot.tex
+pdflatex TextPlot.tex	
+
+# Remove temporary files that are no longer needed
+rm StarPlot_1.pdf
+rm TextPlot_1.pdf
+rm Rplots.pdf
+rm *.aux 
+rm *.log

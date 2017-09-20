@@ -12,15 +12,16 @@ ggtext <- function(plot.data,
                    legend.title="",
                    legend.text.size = text.size,
                    legend.labels=c("Perf1 (left)", "Perf2 (right)"),
-                   pathOfSourceFiles) 
+                   pathOfSourceFiles,
+                   pathToLibrary) 
 {
   # PREPARATION
   
   # This library is based on the ggplot-library
-  library(ggplot2)
-  library(gridExtra)
-  library(grid)
-  library(cowplot)
+  library("ggplot2", lib.loc=pathToLibrary)
+  library("gridExtra", lib.loc=pathToLibrary)
+  library("grid", lib.loc=pathToLibrary)
+  library("cowplot", lib.loc=pathToLibrary)
   
   # Retrieve the location of the script
   #script.dir <- dirname(sys.frame(1)$ofile)
