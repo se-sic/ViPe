@@ -28,6 +28,7 @@ then
 else
 fi
 currentDirectory="$(pwd)"
+# BACH_SOURCE[0]
 
 echo $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}"
 $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}"

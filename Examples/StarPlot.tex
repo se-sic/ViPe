@@ -1,5 +1,6 @@
 \documentclass{standalone}
 
+\usepackage{color}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{positioning, calc}
@@ -12,7 +13,7 @@
 	\newcommand{\PI}{3.141592}
 
 	\newcommand{\centerX}{9.22}
-	\newcommand{\centerY}{-6.4}
+	\newcommand{\centerY}{-6.1}
 	\newcommand{\radius}{3.1}
 	\newcommand{\lineOffset}{0.7}
 	\newcommand{\textsize}{\tiny}
@@ -42,15 +43,15 @@
 
 	\begin{tikzpicture}
 		\node[inner sep=0, anchor=north west] (pic) at (0,0) {\includegraphics[width=\picWidth, height=\picHeight]{StarPlot_1.pdf}};
-		\node[inner sep=0, anchor=south] at (\ax, \ay) {$ root $};
-		\node[inner sep=0, anchor=west, align=left] at (\bx, \by) {$ \phantom{\times}NewRatio$\\$\times UseAdaptiveSizePolicy $};
-		\node[inner sep=0, anchor=west, align=left] at (\cx, \cy) {$ \phantom{\times}NewRatio$\\$\times \log(NewRatio) $};
-		\node[inner sep=0, anchor=west, align=left] at (\dx, \dy) {$ \phantom{\times}NewRatio^{2}$\\$\times UseAdaptiveSizePolicy$\\$\times \log(SurvivorRatio) $};
-		\node[inner sep=0, anchor=west, align=left] at (\ex, \ey) {$ DisableExplicitGC $};
-		\node[inner sep=0, anchor=north] at (\fx, \fy) {$ NewRatio $};
-		\node[inner sep=0, anchor=east, align=right] at (\gx, \gy) {$ NewRatio^{2}\times$\\$UseAdaptiveSizePolicy$\phantom{$\times$}$  $};
-		\node[inner sep=0, anchor=east, align=right] at (\hx, \hy) {$ NewRatio\times$\\$\log(NewRatio)\times$\\$\log(MaxTenuringThreshold)$\phantom{$\times$}$  $};
-		\node[inner sep=0, anchor=east, align=right] at (\ix, \iy) {$ UseAdaptiveSizePolicy $};
-		\node[inner sep=0, anchor=east, align=right] at (\jx, \jy) {$ \log(MaxTenuringThreshold) $};
+		\node[inner sep=0, anchor=south] at (\ax, \ay) {$ \textrm{root} $};
+		\node[inner sep=0, anchor=west, align=left] at (\bx, \by) {$ \phantom{\times}\textrm{NewRatio}$\\$\times \textrm{UseAdaptiveSizePolicy} $};
+		\node[inner sep=0, anchor=west, align=left] at (\cx, \cy) {$ \phantom{\times}\textrm{NewRatio}$\\$\times \textrm{}(\textrm{NewRatio})_{\log}{} $};
+		\node[inner sep=0, anchor=west, align=left] at (\dx, \dy) {$ \phantom{\times}\textrm{NewRatio}^{2}\textrm{}$\\$\times \textrm{UseAdaptiveSizePolicy}$\\$\times \textrm{}(\textrm{SurvivorRatio})_{\log}{} $};
+		\node[inner sep=0, anchor=west, align=left] at (\ex, \ey) {$ \textrm{DisableExplicitGC} $};
+		\node[inner sep=0, anchor=north] at (\fx, \fy) {$ \textrm{NewRatio} $};
+		\node[inner sep=0, anchor=east, align=right] at (\gx, \gy) {$ \textrm{NewRatio}^{2}\textrm{}\times$\\$\textrm{UseAdaptiveSizePolicy}$\phantom{$\times$}$  $};
+		\node[inner sep=0, anchor=east, align=right] at (\hx, \hy) {$ \textrm{NewRatio}\times$\\$\textrm{}(\textrm{NewRatio})_{\log}{}\times$\\$\textrm{}(\textrm{MaxTenuringThreshold})_{\log}{}$\phantom{$\times$}$  $};
+		\node[inner sep=0, anchor=east, align=right] at (\ix, \iy) {$ \textrm{UseAdaptiveSizePolicy} $};
+		\node[inner sep=0, anchor=east, align=right] at (\jx, \jy) {$ \textrm{}(\textrm{MaxTenuringThreshold})_{\log}{} $};
 	\end{tikzpicture}
 \end{document}

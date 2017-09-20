@@ -152,9 +152,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "",
     "\t\\begin{tikzpicture}[every node/.append style={text=black, font=\\textsize}]",
     paste("\t\t\\node[inner sep=0, anchor=north west] (centralImage) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep =""),
-    "\t\\node[inner sep=0, anchor=south west, align=left] at (\\leftOffset, \\topOffset) {$-1$};",
-    "\t\\node[inner sep=0, anchor=south] at (\\leftOffset + \\plotWidth / 2, \\topOffset) {$0$};",
-    "\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftOffset + \\plotWidth, \\topOffset) {$1$};"
+    "\t\t\\node[inner sep=0, anchor=south, align=left] at (\\leftOffset, \\topOffset) {$-1$};",
+    "\t\t\\node[inner sep=0, anchor=south] at (\\leftOffset + \\plotWidth / 2, \\topOffset) {$0$};",
+    "\t\t\\node[inner sep=0, anchor=south, align=right] at (\\leftOffset + \\plotWidth, \\topOffset) {$1$};"
   );
   
   for (i in 1:length(allTerms)) {
