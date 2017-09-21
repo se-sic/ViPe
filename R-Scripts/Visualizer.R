@@ -45,8 +45,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary) {
   #colnames(performanceModels) <- gsub("?", "",colnames(performanceModels))
   
   source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
-  ggtext(performanceModels, text.font = "sans", text.size=12, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary)
+  ggtext(performanceModels, text.font = "sans", text.size=14, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary)
   source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
-  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary)
+  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, legend.text.size=14, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary)
   ggsave("StarPlot_1.pdf", height=8.5, width=11, p)
 }

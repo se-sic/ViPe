@@ -288,67 +288,17 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   # Include the legend
   linePlot  <- linePlot + 
     labs(colour=legend.title,size=legend.text.size) +
-    theme(legend.key.width=unit(3,"line")) + 
+    theme(legend.key.width=unit(4,"line")) + 
     theme(text = element_text(size = 20, family = text.font)) +
     theme(legend.text = element_text(size =legend.text.size), legend.position="bottom") +
-    theme(legend.box.background = element_rect()) + #, legend.box.margin = margin(-2,-2,-2,-2)) + # add the box around the legend
+    theme(legend.box.background = element_rect()) +  # add the box around the legend
     theme(legend.key.height=unit(1,"line")) +
     theme(text=element_text(family=text.font)) +
-    #theme(legend.direction="horizontal")
     labs(x=NULL, y=NULL) +
     guides(colour=guide_legend(nrow=2,byrow=TRUE))
   
-  # # Add the text on the left and the right side, respectively
-  # counter <- length(allTerms[[1]]$label);
-  # 
-  # for (j in 1:length(allTerms[[1]]$label)) {
-  #   tmpLabel <- allTerms[[1]]$label[j];
-  #   xCoord <- maximumY + 0.03
-  # 
-  #   xCoord <- -xCoord;
-  #   
-  #   yCoord <- counter;
-  #   counter <- counter - 1;
-  #   
-  #   linePlot <- linePlot + 
-  #     annotation_custom(
-  #       grob = textGrob(label = allTerms[[1]]$label[j], hjust = 1, gp = gpar(col="black", fontsize=text.size)),
-  #       ymin = yCoord,      # Vertical position of the textGrob
-  #       ymax = yCoord,
-  #       xmin = xCoord,         # Note: The grobs are positioned outside the plot area
-  #       xmax = xCoord)
-  # }
   
-  
-  # counter <- length(allTerms[[2]]$label);
-  # for (j in 1:length(allTerms[[2]]$label)) {
-  #   tmpLabel <- allTerms[[2]]$label[j];
-  #   xCoord <- maximumY + 0.03;
-  #   
-  #   yCoord <- counter;
-  #   counter <- counter - 1;
-  #   
-  #   linePlot <- linePlot + 
-  #     annotation_custom(
-  #       grob = textGrob(label = allTerms[[2]]$label[j], hjust = 0, gp = gpar(col="black", fontsize=text.size)),
-  #       ymin = yCoord,      # Vertical position of the textGrob
-  #       ymax = yCoord,
-  #       xmin = xCoord,         # Note: The grobs are positioned outside the plot area
-  #       xmax = xCoord)
-  #   
-  # }
-  # 
-  # # Code to override clipping
-  # gt <- ggplot_gtable(ggplot_build(linePlot))
-  # gt$layout$clip[gt$layout$name == "panel"] <- "off"
-  
-  #plots <- c(plots, list(gt));
-  
-  #p <- grid.arrange(leftRightArrow, gt, ncol=1, heights=c(2/20,18/20))
-  #ggsave("TextPlot.pdf", height=8.5, width=11, p);
-  #ggsave("TextPlot_1.pdf", height=0.7, width=4, leftRightArrow)
-  
-  ggsave("TextPlot_1.pdf", height=15, width=4, linePlot)
+  ggsave("TextPlot_1.pdf", height=15, width=4.5, linePlot)
   GenerateTexFile("TextPlot.tex", "TextPlot_1.pdf", allTerms)
   
   dev.off();
