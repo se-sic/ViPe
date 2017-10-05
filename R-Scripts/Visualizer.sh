@@ -55,7 +55,9 @@ fi
 # Now, invoke PDFLaTeX
 cd $pathToCsvFiles
 pdflatex StarPlot.tex
+pdfcrop StarPlot.pdf StarPlot.pdf
 pdflatex TextPlot.tex	
+pdfcrop TextPlot.pdf TextPlot.pdf
 
 # Remove temporary files that are no longer needed
 rm StarPlot_1.pdf
