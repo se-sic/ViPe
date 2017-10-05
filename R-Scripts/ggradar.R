@@ -145,6 +145,23 @@ funcCircleCoords <- function(center = c(0,0), r = 1, npoints = 100){
   return(data.frame(x = xx, y = yy))
 }
 
+SplitInHalf <- function(vector) {
+  result <- list();
+  vectorLength <- length(vector);
+  tmp <- c();
+  for (i in 1:round(vectorLength / 2)) {
+    tmp <- c(tmp, vector[i]);
+  }
+  result <- c(result, list(tmp));
+  tmp <- c();
+  for (i in (round(vectorLength / 2) + 1) : vectorLength) {
+    tmp <- c(tmp, vector[i]);
+  }
+  result <- c(result, list(tmp));
+  
+  return(result);
+}
+
 GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   content <- c(
     "\\documentclass{standalone}",
@@ -265,7 +282,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   textLines$path <- CalculateAxisPath(var.names,grid.max+abs(centre.y), grid.max+abs(centre.y)+line.offset)
   
   # Split the labels of the axis for alignment
-  splitLabels <- split(axis.labels, 1:2);
+  splitLabels <- SplitInHalf(axis.labels)
   
   axis.labels <- c(breakText(splitLabels[[1]], includePreceedingPhantom=FALSE), breakText(splitLabels[[2]], rightAlign=TRUE, includePreceedingPhantom=FALSE));
   #print(axis$path)
