@@ -163,7 +163,7 @@ SplitInHalf <- function(vector) {
   return(result);
 }
 
-GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -286,9 +286,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
                  "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {Relevant infuence};",
                  "\t\t% Include legend for the colors",
                  "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
-                 "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {Performance-Influence Model};",
+                 paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep=""),
                  "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
-                 "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {Energy-Influence Model};",
+                 paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
                  "",
                  "\t\t% Draw legend box",
                  "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
@@ -472,14 +472,14 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   theme(legend.text = element_text(size = legend.text.size), legend.position="none") +
   #theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
   #theme(legend.key.height=unit(2,"line")) +
-  scale_colour_manual(values=rep(c("#4045FF", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
+  scale_colour_manual(values=rep(c("#FFB400", "#4045FF", "#007A87",  "#8CE071", "#7B0051", 
     "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +
   scale_fill_manual(name="", values=c("white"), labels="No occurence") #+
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 
   #theme(legend.title=element_blank())
   
-  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text)
+  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1])
 
   return(base)
 

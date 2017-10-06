@@ -131,7 +131,7 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
   return(result);
 }
 
-GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   maxLength <- length(allTerms[[1]]$label);
   content <- c(
     "\\documentclass{standalone}",
@@ -217,9 +217,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "",
     "\t\t% Include legend for the colors",
     "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
-    "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {Performance-Influence Model};",
+    paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep =""),
     "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
-    "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {Energy-Influence Model};",
+    paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
     "",
     "\t\t% Draw legend box",
     "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
@@ -327,7 +327,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     #theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
   
   ggsave("TextPlot_1.pdf", height=15, width=4.5, linePlot)
-  GenerateTexFile("TextPlot.tex", "TextPlot_1.pdf", allTerms)
+  GenerateTexFile("TextPlot.tex", "TextPlot_1.pdf", allTerms, plot.data[,1])
   
   dev.off();
   graphics.off();
