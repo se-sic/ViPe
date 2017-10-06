@@ -132,6 +132,7 @@ GenerateVerticalBarCoordinates <- function(xmin, xmax, ymin, ymax) {
 }
 
 GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
+  maxLength <- length(allTerms[[1]]$label);
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -148,8 +149,30 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "\t\\newcommand{\\plotWidth}{3.3}",
     "\t\\newcommand{\\plotHeight}{11.43}",
     "\t\\newcommand{\\margin}{0.13}",
+    paste("\t\\newcommand{\\numberLabels}{", maxLength * 2, "}", sep =""),
     "",
     "\t\\newcommand{\\textsize}{\\tiny}",
+    "",
+    "\t\t% The definitions for the legend",
+    "\t\t\\newcommand{\\legendOffset}{1}",
+    "\t\t\\newcommand{\\spaceBetweenLegendColumns}{0.8}",
+    "\t\t\\newcommand{\\spaceBetweenLegendRows}{0.6}",
+    "\t\t\\newcommand{\\outerMarginArea}{0.3}",
+    "\t\t\\newcommand{\\spaceBetweenLegendTitleAndLegend}{1}",
+    "",
+    "\t\t% Macros for the legend",
+    "\t\t\\pgfmathsetmacro\\legendX{\\leftOffset + \\plotWidth / 2}",
+    "\t\t\\pgfmathsetmacro\\legendY{\\topOffset - \\plotHeight - \\legendOffset}",
+    "\t\t\\pgfmathsetmacro\\legendTitleX{\\legendX}",
+    "\t\t\\pgfmathsetmacro\\legendTitleY{\\legendY - \\outerMarginArea}",
+    "\t\t\\pgfmathsetmacro\\firstFillnessTitleX{\\legendX - \\spaceBetweenLegendColumns / 2}",
+    "\t\t\\pgfmathsetmacro\\firstFillnessTitleY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend}",
+    "\t\t\\pgfmathsetmacro\\secondFillnessTitleX{\\legendX - \\spaceBetweenLegendColumns / 2}",
+    "\t\t\\pgfmathsetmacro\\secondFillnessTitleY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend - \\spaceBetweenLegendRows}",
+    "\t\t\\pgfmathsetmacro\\firstColorPicX{\\legendX + \\spaceBetweenLegendColumns / 2}",
+    "\t\t\\pgfmathsetmacro\\firstColorPicY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend}",
+    "\t\t\\pgfmathsetmacro\\secondColorPicX{\\legendX + \\spaceBetweenLegendColumns / 2}",
+    "\t\t\\pgfmathsetmacro\\secondColorPicY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend - \\spaceBetweenLegendRows}",
     "",
     "\t\\begin{tikzpicture}[every node/.append style={text=black, font=\\textsize}]",
     paste("\t\t\\node[inner sep=0, anchor=north west] (centralImage) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep =""),
@@ -159,8 +182,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
   );
   
   for (i in 1:length(allTerms)) {
-    maxLength <- length(allTerms[[i]]$label);
-    
     if (i == 1) {
       nodeProp <- "anchor=east, align=right";
       xCoord <- "\\leftOffset - \\margin";
@@ -169,20 +190,40 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
       xCoord <- "\\leftOffset + \\plotWidth + \\margin"
     }
     
-    yCoord <- paste("\\topOffset - \\plotHeight / ", maxLength * 2, sep="");
+    yCoord <- "\\topOffset - \\plotHeight / \\numberLabels";
     
     for (j in 1:maxLength) {
       multiplicationFactor <- 1 + 2*(j-1);
       if (allTerms[[i]]$label[j] != "") {
-        content <- c(content, c(
-          paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (", xCoord, ", ", yCoord, " * ", multiplicationFactor, ") {$", allTerms[[i]]$label[j], "$};", sep="")
-        ));
+        
+          line <- paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (", xCoord, ", ", yCoord, " * ", multiplicationFactor, ") {$", allTerms[[i]]$label[j], "$};", sep="");
+          line <- gsub("$$", "", line, fixed=TRUE)
+          content <- c(content, line);
       }
     }
   }
   
   
   content <- c(content, c(
+    "\t\t% The legend",
+    "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
+    "",
+    "\t\t% Include legend for the fillness",
+    "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {No relevant infuence};",
+    "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+    "",
+    "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
+    "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {Relevant infuence};",
+    "",
+    "\t\t% Include legend for the colors",
+    "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
+    "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {Performance-Influence Model};",
+    "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
+    "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {Energy-Influence Model};",
+    "",
+    "\t\t% Draw legend box",
+    "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+    "",
     "\t\\end{tikzpicture}",
     "\\end{document}"
   ));
@@ -284,19 +325,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     scale_fill_manual(name="", values=c("white"), labels=c("No occurence"))
     #scale_fill_manual(name="Point", values=c(colours[1], colours[2], "white"), labels=c("", "", "No occurence")) #+
     #theme(plot.margin = unit(c(1,15,1,15), "lines")); # Make room for the grobs
-  
-  # Include the legend
-  linePlot  <- linePlot + 
-    labs(colour=legend.title,size=legend.text.size) +
-    theme(legend.key.width=unit(4,"line")) + 
-    theme(text = element_text(size = 20, family = text.font)) +
-    theme(legend.text = element_text(size =legend.text.size), legend.position="bottom") +
-    theme(legend.box.background = element_rect()) +  # add the box around the legend
-    theme(legend.key.height=unit(1,"line")) +
-    theme(text=element_text(family=text.font)) +
-    labs(x=NULL, y=NULL) +
-    guides(colour=guide_legend(nrow=2,byrow=TRUE))
-  
   
   ggsave("TextPlot_1.pdf", height=15, width=4.5, linePlot)
   GenerateTexFile("TextPlot.tex", "TextPlot_1.pdf", allTerms)
