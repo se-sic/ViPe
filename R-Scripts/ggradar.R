@@ -180,8 +180,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
     "\t\\newcommand{\\PI}{3.141592}",
     "",
     "\t\\newcommand{\\centerX}{9.22}",
-    "\t\\newcommand{\\centerY}{-6.1}",
-    "\t\\newcommand{\\radius}{3.1}",
+    "\t\\newcommand{\\centerY}{-7}",
+    "\t\\newcommand{\\radius}{3.3}",
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
@@ -223,6 +223,29 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
                  ))
   }
   
+  content <- c(content, 
+               c("",
+                 "\t% The definitions for the legend",
+                 "\t\\newcommand{\\legendOffset}{3}",
+                 "\t\\newcommand{\\spaceBetweenLegendColumns}{0.8}",
+                 "\t\\newcommand{\\spaceBetweenLegendRows}{0.6}",
+                 "\t\\newcommand{\\outerMarginArea}{0.3}",
+                 "\t\\newcommand{\\spaceBetweenLegendTitleAndLegend}{1}",
+                 "",
+                 "\t% Macros for the legend",
+                 "\t\\pgfmathsetmacro\\legendX{\\centerX}",
+                 "\t\\pgfmathsetmacro\\legendY{\\centerY - \\radius - \\legendOffset}",
+                 "\t\\pgfmathsetmacro\\legendTitleX{\\legendX}",
+                 "\t\\pgfmathsetmacro\\legendTitleY{\\legendY - \\outerMarginArea}",
+                 "\t\\pgfmathsetmacro\\fillnessTitleX{\\legendX - \\spaceBetweenLegendColumns / 2}",
+                 "\t\\pgfmathsetmacro\\fillnessTitleY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend}",
+                 "\t\\pgfmathsetmacro\\firstColorPicX{\\legendX + \\spaceBetweenLegendColumns / 2}",
+                 "\t\\pgfmathsetmacro\\firstColorPicY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend}",
+                 "\t\\pgfmathsetmacro\\secondColorPicX{\\legendX + \\spaceBetweenLegendColumns / 2}",
+                 "\t\\pgfmathsetmacro\\secondColorPicY{\\legendY - \\outerMarginArea - \\spaceBetweenLegendTitleAndLegend - \\spaceBetweenLegendRows}",
+                 ""
+               ));
+  
   
   content <- c(content,
                c(
@@ -248,6 +271,25 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms) {
                  ))
   }
   
+  content <- c(content,
+               c("",
+                 "\t\t% The legend",
+                 "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
+                 "",
+                 "\t\t% Include legend for the fillness",
+                 "\t\t\\node[inner sep=0, anchor = east, align=right] (leftLegendText) at (\\fillnessTitleX, \\fillnessTitleY) {No occurence};",
+                 "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of leftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+                 "",
+                 "\t\t% Include legend for the colors",
+                 "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
+                 "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {Performance-Influence Model};",
+                 "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
+                 "\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {Energy-Influence Model};",
+                 "",
+                 "\t\t% Draw legend box",
+                 "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                 ""
+               ))
   
   content <- c(content, 
                c("\t\\end{tikzpicture}",
@@ -423,19 +465,15 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
 
   base <- base + theme(legend.key.width=unit(3,"line")) + theme(text = element_text(size = 20,
                                                                                       family = font.radar)) +
-  theme(legend.text = element_text(size = legend.text.size), legend.position="bottom") +
-  theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
-  theme(legend.key.height=unit(2,"line")) +
+  theme(legend.text = element_text(size = legend.text.size), legend.position="none") +
+  #theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
+  #theme(legend.key.height=unit(2,"line")) +
   scale_colour_manual(values=rep(c("#4045FF", "#FFB400", "#007A87",  "#8CE071", "#7B0051", 
     "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +
-  scale_fill_manual(name="", values=c("white"), labels="No occurence") +
-  guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
-  theme(text=element_text(family=font.radar)) + 
-  theme(legend.title=element_blank())
-
-  if (plot.title != "") {
-    base <- base + ggtitle(plot.title)
-  }
+  scale_fill_manual(name="", values=c("white"), labels="No occurence") #+
+  #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
+  #theme(text=element_text(family=font.radar)) + 
+  #theme(legend.title=element_blank())
   
   GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text)
 

@@ -29,6 +29,7 @@ else
 fi
 
 currentDirectory=`dirname $BASH_SOURCE`
+currentDirectory=${currentDirectory//\\//}
 
 if [[ "$#" -eq "4" ]]
 then
@@ -52,6 +53,11 @@ if [ "$?" != "0" ]; then
 	read -p "Press enter to continue...";
 	exit 1
 fi
+
+# Copy the images for the legend
+mkdir -p ${pathToCsvFiles}/Resources
+cp ${currentDirectory}/Resources/*.png ${pathToCsvFiles}/Resources/
+
 # Now, invoke PDFLaTeX
 cd $pathToCsvFiles
 pdflatex StarPlot.tex
