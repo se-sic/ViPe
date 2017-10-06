@@ -87,9 +87,10 @@ CalculateGroupPath <- function(df,rv) {
   ##create graph data frame
   graphData= data.frame(seg="", x=0,y=0,val=0)
   graphData=graphData[-1,]
-  allLevels = levels(path);
+  #allLevels = levels(path);
+
   for(count in 1:length(path)){
-    i = allLevels[count];
+    i = path[count];
     pathData = subset(df, df[,1]==i)
     for(j in c(2:ncol(df))){
       #pathData[,j]= pathData[,j]
