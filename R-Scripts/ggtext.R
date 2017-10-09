@@ -214,8 +214,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   
   content <- c(content, c(
     "\t\t% Include the labels for the columns",
-    "\t\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftColumnLabelX, \\leftColumnLabelY) {Distribution-Aware};",
-    "\t\t\\node[inner sep=0, anchor=south west, align=right] at (\\rightColumnLabelX, \\rightColumnLabelY) {Distribution-Preserving};",
+    paste("\t\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftColumnLabelX, \\leftColumnLabelY) {", titles[1], "};", sep=""),
+    paste("\t\t\\node[inner sep=0, anchor=south west, align=right] at (\\rightColumnLabelX, \\rightColumnLabelY) {", titles[2], "};", sep=""),
     "",
     "\t\t% The legend",
     "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
