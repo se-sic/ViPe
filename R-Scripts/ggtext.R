@@ -147,7 +147,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "\t\\newcommand{\\topOffset}{-0.57}",
     "\t\\newcommand{\\leftOffset}{0.12}",
     "\t\\newcommand{\\plotWidth}{3.3}",
-    "\t\\newcommand{\\plotHeight}{11.43}",
+    "\t\\newcommand{\\plotHeight}{12.1}",
     "\t\\newcommand{\\margin}{0.13}",
     paste("\t\\newcommand{\\numberLabels}{", maxLength * 2, "}", sep =""),
     "",
@@ -221,11 +221,11 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
     "",
     "\t\t% Include legend for the fillness",
-    "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {No relevant infuence};",
-    "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+    "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {Relevant infuence};",
+    "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
     "",
-    "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
-    "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {Relevant infuence};",
+    "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+    "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {No relevant infuence};",
     "",
     "\t\t% Include legend for the colors",
     "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
@@ -327,12 +327,19 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     # Maximim, middle and minimum line and the according labels
     geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
     geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
-    geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
+    geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black")
     
-    geom_path(data=lineData, mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
-    
-    geom_point(data=eqZero,aes(x=x,y=y, colour=colour, group = group, fill=I("white")), shape=21, size=group.point.size) +
-    geom_point(data=nonZero,aes(x=x,y=y, colour=colour, group=group), size=group.point.size) +
+    for (k in 1:length(unique(lineData$group))) {
+      groupName <- unique(lineData$group)[k];
+      linePlot <- linePlot + 
+        geom_path(data=lineData[lineData$group == groupName,], mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
+      
+        geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y, colour=colour, group = group, fill=I("white")), shape=21, size=group.point.size) +
+        geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y, colour=colour, group=group), size=group.point.size)
+    }
+  
+  
+  linePlot <- linePlot + 
     scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
     scale_fill_manual(name="", values=c("white"), labels=c("No occurence"))
     #scale_fill_manual(name="Point", values=c(colours[1], colours[2], "white"), labels=c("", "", "No occurence")) #+

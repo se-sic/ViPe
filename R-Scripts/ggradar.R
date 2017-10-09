@@ -279,11 +279,11 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                  "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
                  "",
                  "\t\t% Include legend for the fillness",
-                 "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {No relevant infuence};",
-                 "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+                 "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {Relevant infuence};",
+                 "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
                  "",
-                 "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
-                 "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {Relevant infuence};",
+                 "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+                 "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {No relevant infuence};",
                  "\t\t% Include legend for the colors",
                  "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
                  paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep=""),
@@ -433,8 +433,11 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
 
 
   # ... + group (cluster) 'paths'
-  base <- base + geom_path(data=group$path,aes(x=x,y=y,group=group,colour=group),
-                           size=group.line.width)
+  for (k in 1:length(unique(group$path$group))) {
+    groupName <- unique(group$path$group)[k];
+    base <- base + geom_path(data=group$path[group$path$group == groupName,],aes(x=x,y=y,group=group,colour=group),
+                            size=group.line.width)
+  }
 
   # Filter the group points
   nonZero <- group$path;
@@ -443,8 +446,11 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   eqZero <- eqZero[group$path$val == 0,];
   
   # ... + group points (cluster data)
-  base <- base + geom_point(data=eqZero,aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)
-  base <- base + geom_point(data=nonZero,aes(x=x,y=y,group=group,colour=group), size=group.point.size)
+  for (k in 1:length(unique(eqZero$group))) {
+    groupName <- unique(eqZero$group)[k];
+    base <- base + geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)
+    base <- base + geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y,group=group,colour=group), size=group.point.size)
+  }
 
   #... + amend Legend title
   if (plot.legend==TRUE) base  <- base + labs(colour=legend.title,size=legend.text.size)
