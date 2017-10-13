@@ -5,6 +5,17 @@
 #' 
 textEnvironment <- "\\textrm{"
 
+putInTextEnvironment <- function(text) {
+  result = "";
+  if (grepl("^", text, fixed=TRUE)) {
+    splitString = strsplit(text, split='^', fixed=TRUE);
+    result <- paste(textEnvironment, splitString[[1]][1], "}^", splitString[[1]][2], sep="")
+  } else {
+    result = paste(textEnvironment, text, "}", sep="");
+  }
+  return(result);
+}
+
 breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrecedingPhantom = TRUE) {
   #Breaks a line at the given minimum length if a certain symbol ('?') is parsed
   #Args:
@@ -19,8 +30,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
   while (i <= nchar(line) && !found) {
     character <- substring(line, i, i);
     if (character == '*') {
-      left <- substring(line,0,i-1);
-      left <- paste(textEnvironment, left, "}", sep="")
+      left <- putInTextEnvironment(substring(line,0,i-1));
       right <- breakLine(substring(line,i+1,nchar(line)), rightAlign, TRUE, includePrecedingPhantom);
       if (doRecursiveCall) {
         if (rightAlign) {
@@ -40,13 +50,13 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
     i <- i + 1;
   }
   if (result == "" && !doRecursiveCall && includePrecedingPhantom) {
-      line <- paste(textEnvironment, line, "}", sep="")
+      line <- putInTextEnvironment(line)
       line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
       line <- gsub(")", "})_{\\log}{", line, fixed=TRUE)
       return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
     
   } else if (result == "") {
-    line <- paste(textEnvironment, line, "}", sep="")
+    line <- putInTextEnvironment(line);
     if (!doRecursiveCall) {
       # Replace log-function
       line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
