@@ -1,4 +1,16 @@
-visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary) {
+meanNormalization <- function(dataToNormalize) {
+  result <- NULL;
+  
+  minimumValue <- min(dataToNormalize);
+  maximumValue <- max(dataToNormalize);
+  meanValue <- mean(apply(dataToNormalize, 1, mean));
+  
+  result <- (dataToNormalize - meanValue) / (maximumValue - minimumValue);
+  
+  return(result);
+}
+
+visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMeanNormalization=FALSE) {
   
   library("ggplot2", lib.loc=pathToLibrary)
   library("labeling", lib.loc=pathToLibrary)
@@ -37,12 +49,15 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary) {
     }
   }
   
-  # Find the maximum and minimum value
-  maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
-  minimumValue <- -maximumValue;
-  
-  performanceModels[-1] <- performanceModels[-1]  / maximumValue
-  #colnames(performanceModels) <- gsub("?", "",colnames(performanceModels))
+  if (doMeanNormalization) {
+    performanceModels[-1] <- meanNormalization(performanceModels[-1]);
+  } else {
+    # Find the maximum and minimum value
+    maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
+    minimumValue <- -maximumValue;
+    
+    performanceModels[-1] <- performanceModels[-1]  / maximumValue
+  }
   
   source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
   ggtext(performanceModels, text.font = "sans", text.size=14, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary)
