@@ -333,9 +333,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   
   # Help bars on the y-axis
   helpBarCoords <- GenerateVerticalBarCoordinates(-1, 1, 1, maximumX);
-
+  
   linePlot <- ggplot(data=lineData) + theme_nothing();
-  linePlot <- linePlot + 
+  linePlot <- linePlot +
     #geom_segment(data=helpLineCoords, mapping=aes(x=x, y=y, xend=xend, yend=yend), colour="gray") + # add help lines in the background
     # Add the green and red backgroud colour
     geom_rect(data=negRect, mapping=aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="indianred1", alpha=0.25) +
@@ -346,18 +346,25 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     geom_line(data=maxLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
     geom_line(data=midLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black") +
     geom_line(data=minLine, mapping=aes(y=x,x=y), linetype="dashed", colour="black")
-    
+
     for (k in 1:length(unique(lineData$group))) {
       groupName <- unique(lineData$group)[k];
-      linePlot <- linePlot + 
-        geom_path(data=lineData[lineData$group == groupName,], mapping=aes(x=x,y=y, colour=colour, group = group), size=2) +
+      linePlot <- linePlot +
+        geom_path(data=lineData[lineData$group == groupName,], mapping=aes(x=x,y=y, colour=colour, group = group), size=2)
+
+        if (nrow(eqZero[eqZero$group == groupName,]) > 0) {
+        linePlot <- linePlot + 
+          geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y, colour=colour, group = group, fill=I("white")), shape=21, size=group.point.size)
+        }
       
-        geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y, colour=colour, group = group, fill=I("white")), shape=21, size=group.point.size) +
-        geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y, colour=colour, group=group), size=group.point.size)
+      if (nrow(nonZero[nonZero$group == groupName,]) > 0) {
+       linePlot <- linePlot +
+         geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y, colour=colour, group=group), size=group.point.size)
+      }
     }
   
   
-  linePlot <- linePlot + 
+  linePlot <- linePlot +
     scale_colour_manual(labels=plot.data[,1], values=c(colours[1], colours[2])) +
     scale_fill_manual(name="", values=c("white"), labels=c("No occurence"))
     #scale_fill_manual(name="Point", values=c(colours[1], colours[2], "white"), labels=c("", "", "No occurence")) #+

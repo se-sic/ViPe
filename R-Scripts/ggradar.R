@@ -456,11 +456,18 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   eqZero <- group$path;
   eqZero <- eqZero[group$path$val == 0,];
   
+  browser();
   # ... + group points (cluster data)
-  for (k in 1:length(unique(eqZero$group))) {
-    groupName <- unique(eqZero$group)[k];
-    base <- base + geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)
-    base <- base + geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y,group=group,colour=group), size=group.point.size)
+  for (k in 1:length(unique(group$path$group))) {
+    groupName <- unique(group$path$group)[k];
+    
+    if (nrow(eqZero[eqZero$group == groupName,]) > 0) {
+      base <- base + geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)  
+    }
+    
+    if (nrow(nonZero[nonZero$group == groupName,]) > 0) {
+      base <- base + geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y,group=group,colour=group), size=group.point.size)  
+    }
   }
 
   #... + amend Legend title
