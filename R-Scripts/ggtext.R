@@ -211,11 +211,15 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     }
   }
   
-  
-  content <- c(content, c(
+  legendContent <- c(
     "\t\t% Include the labels for the columns",
-    paste("\t\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftColumnLabelX, \\leftColumnLabelY) {", titles[1], "};", sep=""),
-    paste("\t\t\\node[inner sep=0, anchor=south west, align=right] at (\\rightColumnLabelX, \\rightColumnLabelY) {", titles[2], "};", sep=""),
+    paste("\t\t\\node[inner sep=0, anchor=south east, align=right] at (\\leftColumnLabelX, \\leftColumnLabelY) {", titles[1], "};", sep=""));
+  if (length(titles) == 2) {
+    legendContent <- c(legendContent, 
+      paste("\t\t\\node[inner sep=0, anchor=south west, align=right] at (\\rightColumnLabelX, \\rightColumnLabelY) {", titles[2], "};", sep="")
+    );
+  }
+  legendContent <- c(legendContent,
     "",
     "\t\t% The legend",
     "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
@@ -229,16 +233,30 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "",
     "\t\t% Include legend for the colors",
     "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
-    paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep =""),
-    "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
+    paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep ="")
+  );
+  
+  if (length(titles) == 2) {
+    legendContent <- c(legendContent, "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
     paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
     "",
     "\t\t% Draw legend box",
     "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
-    "",
+    "");
+  } else {
+    legendContent <- c(legendContent, 
+                       "",
+                       "\t\t% Draw legend box",
+                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       "");
+  }
+  
+  legendContent <- c(legendContent, c(
     "\t\\end{tikzpicture}",
     "\\end{document}"
   ));
+  
+  content <- c(content, legendContent);
   
   fileConn <- file(filePath);
   

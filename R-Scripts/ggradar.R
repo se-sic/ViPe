@@ -273,27 +273,38 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                  ))
   }
   
+  legendContent <- c("",
+      "\t\t% The legend",
+      "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
+      "",
+      "\t\t% Include legend for the fillness",
+      "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {Relevant infuence};",
+      "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
+      "",
+      "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
+      "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {No relevant infuence};",
+      "\t\t% Include legend for the colors",
+      "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
+      paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep="")
+    )
+  if (length(titles) == 2) {
+    legendContent <- c(legendContent, 
+                       "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
+                       paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
+                       "",
+                       "\t\t% Draw legend box",
+                       "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       "")
+  } else {
+    legendContent <- c(legendContent, 
+                       "",
+                       "\t\t% Draw legend box",
+                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       "")
+  }
+  
   content <- c(content,
-               c("",
-                 "\t\t% The legend",
-                 "\t\t\\node[inner sep=0, anchor = north, align=center] at (\\legendTitleX, \\legendTitleY) {\\Large \\textbf{Legend}};",
-                 "",
-                 "\t\t% Include legend for the fillness",
-                 "\t\t\\node[inner sep=0, anchor = east, align=right] (firstLeftLegendText) at (\\firstFillnessTitleX, \\firstFillnessTitleY) {Relevant infuence};",
-                 "\t\t\\node[inner sep=0, anchor=south east, left = 0.1 of firstLeftLegendText] (emptyCircle) {\\includegraphics[width=10px, height=10px]{Resources/FullCircle.png}};",
-                 "",
-                 "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
-                 "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {No relevant infuence};",
-                 "\t\t% Include legend for the colors",
-                 "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
-                 paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep=""),
-                 "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
-                 paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
-                 "",
-                 "\t\t% Draw legend box",
-                 "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
-                 ""
-               ))
+               legendContent)
   
   content <- c(content, 
                c("\t\\end{tikzpicture}",

@@ -66,8 +66,8 @@ pdflatex TextPlot.tex
 pdfcrop TextPlot.pdf TextPlot.pdf
 
 # Remove temporary files that are no longer needed
-rm StarPlot_1.pdf
-rm TextPlot_1.pdf
+#rm StarPlot_1.pdf
+#rm TextPlot_1.pdf
 rm Rplots.pdf
 rm *.aux 
 rm *.log

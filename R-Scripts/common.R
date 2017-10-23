@@ -101,14 +101,13 @@ getExponent <- function(exponent) {
     }
   }
   
-  result <- paste("}^{", result, "}", textEnvironment, sep="")
+  result <- paste("^{", result, "}", sep="")
   
   return(result);
 }
 
 prepareLine <- function(line) {
   #
-  
   strings <- strsplit(line,"\\*");
   counter <- NULL;
   
