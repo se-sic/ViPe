@@ -28,8 +28,25 @@ else
 	pathToRscript="$3";
 fi
 
-currentDirectory=`dirname $BASH_SOURCE`
-currentDirectory=${currentDirectory//\\//}
+# Detect the platform the script is running on
+platform='unknown'
+unamestr=`uname`
+
+if [[ "$unamestr" == 'Linux' ]]; then
+  platform='linux'
+else 
+  platform='windows'
+fi
+
+if [[ "$platform" == 'windows' ]]; then
+  currentDirectory=`dirname $BASH_SOURCE`
+  currentDirectory=${currentDirectory//\\//}
+else 
+  $?=0;
+  currentDirectory=$(dirname `realpath $0`)
+fi
+
+echo "Current directory: $currentDirectory";
 
 if [[ "$#" -eq "4" ]]
 then
