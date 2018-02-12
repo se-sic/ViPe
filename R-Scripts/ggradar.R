@@ -50,7 +50,23 @@ ggradar <- function(plot.data,
   #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
   source(paste(pathOfSourceFiles, "common.R", sep=""))
-
+  library(RColorBrewer, lib.loc=pathToLibrary)
+  
+  #generate dynamic colors for plot
+  numberModels <- length(plot.data[,1])
+  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+  colorsVector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+  colorsVector <- sample(colorsVector, numberModels)
+  
+  #generate pictures for latex 
+  templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
+  library(magick, lib.loc=pathToLibrary)
+  for(i in 1:numberModels) {
+    templateColorCircle <- image_read(templateColorCirclePath)
+    templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
+    image_write(templateColorCircle, path = paste(pathToSourceFiles,"/Resources/Color", i,".png", sep=""))
+  }
+  
   plot.data <- as.data.frame(plot.data)
 
   plot.data[,1] <- as.factor(as.character(plot.data[,1]))
@@ -284,16 +300,21 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
       "\t\t\\node[inner sep=0, anchor=north, below = 0.1 of emptyCircle] (fullCircle) {\\includegraphics[width=10px, height=10px]{Resources/EmptyCircle.png}};",
       "\t\t\\node[inner sep=0, anchor = west, align=left, right = 0.1 of fullCircle] (secondLeftLegendText) {No relevant influence};",
       "\t\t% Include legend for the colors",
-      "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/FirstColor.png}};",
+      "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (firstColor) at (\\firstColorPicX, \\firstColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/Color1.png}};",
       paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of firstColor] (firstColorLabel) {", titles[1], "};", sep="")
     )
-  if (length(titles) == 2) {
+  
+  if (length(titles) >= 2) {
+    for (i in 2:length(titles)) {
+      legendContent <- c(legendContent, 
+                         paste("\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (Color",i,") at (\\secondColorPicX, \\secondColorPicY - \\spaceBetweenLegendRows *",i-2,") {\\includegraphics[width=25px, height=10px]{Resources/Color",i,".png}};", sep=""),
+                         paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of Color",i,"] (Color",i,") {", titles[i], "};", sep="")
+                         )
+    }
     legendContent <- c(legendContent, 
-                       "\t\t\\node[inner sep=0, yshift=-4, anchor=south west, align=center] (secondColor) at (\\secondColorPicX, \\secondColorPicY) {\\includegraphics[width=25px, height=10px]{Resources/SecondColor.png}};",
-                       paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of secondColor] (secondColorLabel) {", titles[2], "};", sep=""),
                        "",
                        "\t\t% Draw legend box",
-                       "\t\t\\draw let \\p1=(secondColorLabel.south east) in let \\p2=(firstColorLabel.south east) in let \\n1={max(\\x1,\\x2)} in  ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\n1, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
                        "")
   } else {
     legendContent <- c(legendContent, 
@@ -444,6 +465,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
 
 
   # ... + group (cluster) 'paths'
+  browser();
   for (k in 1:length(unique(group$path$group))) {
     groupName <- unique(group$path$group)[k];
     base <- base + geom_path(data=group$path[group$path$group == groupName,],aes(x=x,y=y,group=group,colour=group),
@@ -496,15 +518,15 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   theme(legend.text = element_text(size = legend.text.size), legend.position="none") +
   #theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
   #theme(legend.key.height=unit(2,"line")) +
-  scale_colour_manual(values=rep(c("#FFB400", "#4045FF", "#007A87",  "#8CE071", "#7B0051", 
-    "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"), 100)) +
+  scale_colour_manual(values=rep(c(colorsVector, c( "#007A87",  "#8CE071", "#7B0051", 
+    "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20")), 100)) +
   scale_fill_manual(name="", values=c("white"), labels="No occurence") #+
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 
   #theme(legend.title=element_blank())
-  
   GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1])
 
   return(base)
 
 }
+
