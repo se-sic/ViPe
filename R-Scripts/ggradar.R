@@ -50,7 +50,7 @@ ggradar <- function(plot.data,
   #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
   source(paste(pathOfSourceFiles, "common.R", sep=""))
-  library(RColorBrewer, lib.loc=pathToLibrary)
+  library("RColorBrewer", lib.loc=pathToLibrary)
   
   #generate dynamic colors for plot
   numberModels <- length(plot.data[,1])
@@ -60,7 +60,7 @@ ggradar <- function(plot.data,
   
   #generate pictures for latex 
   templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
-  library(magick, lib.loc=pathToLibrary)
+  library("magick", lib.loc=pathToLibrary)
   for(i in 1:numberModels) {
     templateColorCircle <- image_read(templateColorCirclePath)
     templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
@@ -314,7 +314,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     legendContent <- c(legendContent, 
                        "",
                        "\t\t% Draw legend box",
-                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
                        "")
   } else {
     legendContent <- c(legendContent, 
