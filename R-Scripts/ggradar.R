@@ -50,13 +50,11 @@ ggradar <- function(plot.data,
   #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
   source(paste(pathOfSourceFiles, "common.R", sep=""))
-  library("RColorBrewer", lib.loc=pathToLibrary)
+  library("grDevices", lib.loc=pathToLibrary)
   
   #generate dynamic colors for plot
   numberModels <- length(plot.data[,1])
-  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
-  colorsVector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-  colorsVector <- sample(colorsVector, numberModels)
+  colorsVector <- rainbow(numberModels)
   
   #generate pictures for latex 
   templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
