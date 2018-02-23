@@ -10,7 +10,8 @@ meanNormalization <- function(dataToNormalize) {
   return(result);
 }
 
-visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMeanNormalization=FALSE) {
+visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMeanNormalization=FALSE
+                      , featureModel="") {
   library("ggplot2", lib.loc=pathToLibrary)
   library("labeling", lib.loc=pathToLibrary)
   library("digest", lib.loc=pathToLibrary)
@@ -46,6 +47,72 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     } else {
       performanceModels <- rbind(performanceModels, performanceModel)
     }
+  }
+  browser();
+  # consider adjusting influences to the value range of the configuration
+  if (featureModel != "") {
+    fmFile <- file(featureModel, open='r')
+    lines <- readLines(fmFile)
+    
+    options <- vector(mode="character", length=0)
+    values <- vector(mode="numeric", length=0)
+    
+    for (i in 1:length(lines)) {
+      
+      keyAndValue = unlist(strsplit(lines[i], "[=]"))
+      options <- c(options, keyAndValue[1])
+      valueRange <- unlist(strsplit(unlist(strsplit(keyAndValue[2], "[[]"))[2], "[]]"))[1]
+      UpperAndLower <- unlist(strsplit(valueRange, "[,]"))
+      valueAdjust <- as.numeric(UpperAndLower[1]) - as.numeric(UpperAndLower[2])
+      values <- c(values, valueAdjust)
+      
+    }
+    
+    names(values) <- options
+    
+    for(i in 2:length(performanceModels)) {
+      
+      interaction <- colnames(performanceModels)[i]
+      
+      if (grepl(interaction, pattern="\\*") || grepl(interaction, pattern="log")) {
+        
+        variables <- unlist(strsplit(interaction, "[*]"))
+        valueWeight <- 1
+        
+        for (x in 1:length(variables)) {
+          
+          if (!grepl(variables[x], pattern="log\\(")) {
+            
+            valueWeight <- valueWeight * values[gsub("^\\s+|\\s+$", "", variables[x])]
+            
+          } else {
+            
+            valueWeight <- valueWeight * log10(values[gsub("log\\(|\\)$", "",  variables[x])])
+            
+          }
+          
+          for (j in 1:nrow(performanceModels)) {
+            
+            performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
+            
+          }
+        }
+      } else {
+        
+        valueWeight <- values[interaction]
+        for (j in 1:nrow(performanceModels)) {
+          
+          performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
+          
+        }
+      }
+    } 
+    
+  }
+  
+  for(i in 2:length(performanceModels)) {
+      print(performanceModels[i])
+      print(colnames(performanceModels)[i])
   }
   
   if (doMeanNormalization) {
