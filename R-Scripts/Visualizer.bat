@@ -1,4 +1,6 @@
+setlocal enabledelayedexpansion
 @echo off
+
 set argC=0
 for %%x in (%*) do Set /A argC+=1
 echo %argc%
@@ -14,20 +16,12 @@ set pathToLibDir="%2"
 
 set pathToRscript="%3"
 
-set pathToVM =  ""
-
-if "%argc%" GTR "3" (
-	set pathToVM =  "%4"
-	
-	if "%pathToVM%" == "NONE" (
-		set pathToVM = ""
-	)
-)
+set pathToVM =  "%4"
 
 set currentDirectory=%cd%
 
 echo Current directory: %currentDirectory%
-
+echo %pathToVM%
 if "%argc%" EQU "5" (
 	:: Perform installation
 	echo %pathToRscript% %currentDirectory%\InstallationWrapper.R %pathToLibDir% %currentDirectory%
