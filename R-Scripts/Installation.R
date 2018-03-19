@@ -7,6 +7,8 @@ installNeededPackages <- function(path) {
   install.packages("scales", lib=path, repos="https://cran.uni-muenster.de/")
 
   install.packages("cowplot", lib=path, repos="https://cran.uni-muenster.de/")
+  install.packages("labeling", lib=path, repos="https://cran.uni-muenster.de/")
+  install.packages("digest", lib=path, repos="https://cran.uni-muenster.de/")
 
   # Install devtools for downloading the newest version of some packages
   install.packages("devtools", lib=path, repos="https://cran.uni-muenster.de/")
