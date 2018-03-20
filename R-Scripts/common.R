@@ -7,6 +7,8 @@ textEnvironment <- "\\textrm{"
 
 putInTextEnvironment <- function(text) {
   result = "";
+  # Escape underscores for LaTeX
+  text <- gsub("_", "\\_", text)
   if (grepl("^", text, fixed=TRUE)) {
     splitString = strsplit(text, split='^', fixed=TRUE);
     result <- paste(textEnvironment, splitString[[1]][1], "}^", splitString[[1]][2], sep="")
@@ -52,6 +54,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
   if (result == "" && !doRecursiveCall && includePrecedingPhantom) {
       line <- putInTextEnvironment(line)
       line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
+      line <- gsub("log10(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
       line <- gsub(")", "})_{\\log}{", line, fixed=TRUE)
       return(paste("$\\phantom{$", timeSymbol, "$}$", line, sep=""));
     
@@ -60,6 +63,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
     if (!doRecursiveCall) {
       # Replace log-function
       line <- gsub("log(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
+      line <- gsub("log10(", paste("}(", textEnvironment, sep=""), line, fixed=TRUE)
       line <- gsub(")", "})_{\\log}{", line, fixed=TRUE)
     }
     return(line);
@@ -68,6 +72,7 @@ breakLine <- function(line, rightAlign=FALSE, doRecursiveCall=FALSE, includePrec
   if (!doRecursiveCall) {
     # Replace log-function
     result <- gsub("log(", paste("}(", textEnvironment, sep=""), result, fixed=TRUE)
+    result <- gsub("log10(", paste("}(", textEnvironment, sep=""), result, fixed=TRUE)
     result <- gsub(")", "})_{\\log}{", result, fixed=TRUE)
   }
   return(result);

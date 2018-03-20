@@ -53,7 +53,6 @@ if [[ "$platform" == 'windows' ]]; then
   currentDirectory=`dirname $BASH_SOURCE`
   currentDirectory=${currentDirectory//\\//}
 else 
-  $?=0;
   currentDirectory=$(dirname `realpath $0`)
 fi
 
