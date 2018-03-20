@@ -24,7 +24,7 @@ To execute ViPe, certain program arguments are needed, which are as follows:
 <PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PathToVM] [PerformInstallation]
 ```
 , where:
-* **PathToDirectoryWithCsvFiles** is the path to the directory containing the performance models as .csv-files (see [.csv Files](#.csv-files)).
+* **PathToDirectoryWithCsvFiles** is the path to the directory containing the performance models as .csv-files (see [.csv Files](#.csv-file)).
 * **PathToLibDir** is the path where the libraries should be stored.
 * **PathToRscript** (optional) is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript
 * **PathToVM** (optional) is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or 'NONE' to indicate that no file exists (see [Variability Model](#variability-model)).
