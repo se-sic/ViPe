@@ -1,9 +1,27 @@
 #' ggradar
-#' @author Ricardo Bion
-#' @export ggradar
+#' @author Christian Kaltenecker
 #'
 #' @export
-# most of the code is from http://rstudio-pubs-static.s3.amazonaws.com/5795_e6e6411731bb4f1b9cc7eb49499c2082.html
+# most of the code is from Ricardio Bion (https://github.com/ricardo-bion/ggradar) and from Paul Williamson (http://rstudio-pubs-static.s3.amazonaws.com/5795_e6e6411731bb4f1b9cc7eb49499c2082.html)
+
+# CHANGELOG for the file ggradar.R:
+# 01.08.2017: Imported the code from Ricario Bion
+# 24.08.2017: Formated the code
+# 04.09.2017: Modified the alignment of the text
+# 05.09.2017: Added different colors to the plot
+# 11.09.2017: Modified the function to work with a wrapper-script
+# 14.09.2017: Added LaTeX output for drawing the legend
+# 17.09.2017: Positioned the labels via LaTeX
+# 19.09.2017: Refined the output for LaTeX
+# 20.09.2017: Adjusted the arguments for compatibility with Windows
+# 30.09.2017: Bugfix - wrong circles have been drawn
+# 05.10.2017: Bugfix - text was printed in a wrong order
+# 06.10.2017: Refined the positioning of the legend
+# 09.10.2017: Adjusted order in which the lines and points are drawn
+# 23.10.2017: Extended the script to work with one single model
+# 12.02.2018: Added dynamic color generation for models
+# 13.02.2018: Improved the legend box and color palette
+# 23.02.2018: Added information from the domain of the variables
 
 
 ggradar <- function(plot.data,
@@ -527,4 +545,3 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   return(base)
 
 }
-

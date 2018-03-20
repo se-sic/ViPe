@@ -7,6 +7,8 @@ installNeededPackages <- function(path) {
   install.packages("scales", lib=path, repos="https://cran.uni-muenster.de/")
 
   install.packages("cowplot", lib=path, repos="https://cran.uni-muenster.de/")
+  install.packages("labeling", lib=path, repos="https://cran.uni-muenster.de/")
+  install.packages("digest", lib=path, repos="https://cran.uni-muenster.de/")
 
   # install packages for image processing
   install.packages("magick", lib=path, repos="https://cran.uni-muenster.de/")
