@@ -22,6 +22,7 @@
 # 12.02.2018: Added dynamic color generation for models
 # 13.02.2018: Improved the legend box and color palette
 # 23.02.2018: Added information from the domain of the variables
+# 20.03.2018: Removed some debug-statements
 
 
 ggradar <- function(plot.data,
@@ -481,7 +482,6 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
 
 
   # ... + group (cluster) 'paths'
-  browser();
   for (k in 1:length(unique(group$path$group))) {
     groupName <- unique(group$path$group)[k];
     base <- base + geom_path(data=group$path[group$path$group == groupName,],aes(x=x,y=y,group=group,colour=group),
@@ -494,7 +494,6 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   eqZero <- group$path;
   eqZero <- eqZero[group$path$val == 0,];
   
-  browser();
   # ... + group points (cluster data)
   for (k in 1:length(unique(group$path$group))) {
     groupName <- unique(group$path$group)[k];

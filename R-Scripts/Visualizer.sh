@@ -9,7 +9,7 @@ function printUsage {
 	echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
 }
 
-if [[ "$#" -lt "2" || "$#" -gt "4"  ]]
+if [[ "$#" -lt "2" || "$#" -gt "5"  ]]
 then
 	printUsage
 	read -p "Press enter to continue...";
@@ -22,7 +22,7 @@ pathToLibDir="$2";
 
 mkdir -p $pathToLibDir
 
-pathToVM = ""
+pathToVM=""
 
 if [ "$#" -lt "3" ]
 then
@@ -32,10 +32,10 @@ else
 fi
 
 if [[ "$#" -gt "3" ]]; then
-	if [["$4" == "NONE"]]; then
-		pathToVM = ""
+	if [[ "$4" == "NONE" ]]; then
+		pathToVM=""
 	else
-		pathToVM = "$4"
+		pathToVM="$4"
 	fi
 fi
 

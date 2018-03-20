@@ -48,7 +48,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       performanceModels <- rbind(performanceModels, performanceModel)
     }
   }
-  browser();
+
   # consider adjusting influences to the value range of the configuration
   if (featureModel != "") {
     fmFile <- file(featureModel, open='r')
@@ -110,10 +110,10 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
   }
   
-  for(i in 2:length(performanceModels)) {
-      print(performanceModels[i])
-      print(colnames(performanceModels)[i])
-  }
+  #for(i in 2:length(performanceModels)) {
+  #    print(performanceModels[i])
+  #    print(colnames(performanceModels)[i])
+  #}
   
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
