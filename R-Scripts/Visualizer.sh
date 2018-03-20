@@ -95,6 +95,6 @@ pdfcrop TextPlot.pdf TextPlot.pdf
 # Remove temporary files that are no longer needed
 #rm StarPlot_1.pdf
 #rm TextPlot_1.pdf
-rm Rplots.pdf
+rm Rplot.pdf 2> /dev/null
 rm *.aux 
 rm *.log
