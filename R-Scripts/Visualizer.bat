@@ -1,4 +1,6 @@
+setlocal enabledelayedexpansion
 @echo off
+
 set argC=0
 for %%x in (%*) do Set /A argC+=1
 echo %argc%
@@ -14,11 +16,13 @@ set pathToLibDir="%2"
 
 set pathToRscript="%3"
 
+set pathToVM =  "%4"
+
 set currentDirectory=%cd%
 
 echo Current directory: %currentDirectory%
-
-if "%argc%" EQU "4" (
+echo %pathToVM%
+if "%argc%" EQU "5" (
 	:: Perform installation
 	echo %pathToRscript% %currentDirectory%\InstallationWrapper.R %pathToLibDir% %currentDirectory%
 	"%pathToRscript%" %currentDirectory%\InstallationWrapper.R "%pathToLibDir%" "%currentDirectory%"
@@ -31,8 +35,8 @@ if %errorlevel% GTR 0 (
 )
 
 :: Execute the R-scripts and pass arguments to it
-echo %pathToRscript% %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%"
-"%pathToRscript%" %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%"
+echo %pathToRscript% %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%" "%pathToVM%"
+"%pathToRscript%" %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%" "%pathToVM%"
 
 if %errorlevel% GTR 0 (
 	echo [Error] R-script execution failed!
@@ -64,4 +68,5 @@ echo "Usage: ./Visualizer.sh <PathToDirectoryWithCsvFiles> <PathToLibDir> [PathT
 echo "PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
 echo "PathToLibDir is the path where the libraries should be stored.";
 echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
+echo "PathToVM is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or NONE to indicate that no file exists.";
 echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";

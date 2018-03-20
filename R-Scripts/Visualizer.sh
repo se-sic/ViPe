@@ -1,14 +1,15 @@
 #!/bin/bash
 
 function printUsage {
-	echo "Usage: ./Visualizer.sh <PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PerformInstallation]";
+	echo "Usage: ./Visualizer.sh <PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PathToVM] [PerformInstallation]";
 	echo "PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
 	echo "PathToLibDir is the path where the libraries should be stored.";
 	echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
+	echo "PathToVM is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or NONE to indicate that no file exists.";
 	echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
 }
 
-if [[ "$#" -lt "2" || "$#" -gt "4"  ]]
+if [[ "$#" -lt "2" || "$#" -gt "5"  ]]
 then
 	printUsage
 	read -p "Press enter to continue...";
@@ -21,11 +22,21 @@ pathToLibDir="$2";
 
 mkdir -p $pathToLibDir
 
+pathToVM=""
+
 if [ "$#" -lt "3" ]
 then
 	pathToRscript="Rscript"
 else 
 	pathToRscript="$3";
+fi
+
+if [[ "$#" -gt "3" ]]; then
+	if [[ "$4" == "NONE" ]]; then
+		pathToVM=""
+	else
+		pathToVM="$4"
+	fi
 fi
 
 # Detect the platform the script is running on
@@ -48,11 +59,11 @@ fi
 
 echo "Current directory: $currentDirectory";
 
-if [[ "$#" -eq "4" ]]
+if [[ "$#" -eq "5" ]]
 then
 	# Perform installation
-	echo "$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
-	"$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
+	echo "$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}" "${pathToVM}"
+	"$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}" "${pathToVM}"
 fi
 
 if [ "$?" != "0" ]; then

@@ -10,6 +10,10 @@ installNeededPackages <- function(path) {
   install.packages("labeling", lib=path, repos="https://cran.uni-muenster.de/")
   install.packages("digest", lib=path, repos="https://cran.uni-muenster.de/")
 
+  # install packages for image processing
+  install.packages("magick", lib=path, repos="https://cran.uni-muenster.de/")
+  # Package for color generation
+  install.packages("grDevices", lib=path, repos="https://cran.uni-muenster.de/")
   # Install devtools for downloading the newest version of some packages
   install.packages("devtools", lib=path, repos="https://cran.uni-muenster.de/")
 
