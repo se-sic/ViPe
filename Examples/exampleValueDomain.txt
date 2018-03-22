@@ -1,0 +1,6 @@
+root=[0,1]
+DisableExplicitGC=[0,1]
+UseAdaptiveSizePolicy=[0,1]
+MaxTenuringThreshold=[5,15]
+SurvivorRatio=[1,30]
+NewRatio=[1,32]

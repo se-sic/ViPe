@@ -11,7 +11,7 @@ meanNormalization <- function(dataToNormalize) {
 }
 
 visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMeanNormalization=FALSE
-                      , featureModel="") {
+                      , valueDomain="") {
   library("ggplot2", lib.loc=pathToLibrary)
   library("labeling", lib.loc=pathToLibrary)
   library("digest", lib.loc=pathToLibrary)
@@ -50,9 +50,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   }
 
   # consider adjusting influences to the value range of the configuration
-  if (featureModel != "") {
-    fmFile <- file(featureModel, open='r')
-    lines <- readLines(fmFile)
+  if (valueDomain != "" && valueDomain != "NONE") {
+    vdFile <- file(valueDomain, open='r')
+    lines <- readLines(vdFile)
     
     options <- vector(mode="character", length=0)
     values <- vector(mode="numeric", length=0)

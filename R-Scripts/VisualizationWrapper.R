@@ -6,9 +6,9 @@ args <- commandArgs(TRUE);
 pathToFiles <- args[1];
 pathToSourceFiles <- args[2];
 pathToLibraries <- args[3]
-pathFeatureModel <- ""
+pathValueDomain <- ""
 if (length(args) == 4) {
-  pathFeatureModel <- args[4]  
+  pathValueDomain <- args[4]  
 }
 
 if (!endsWith(pathToFiles, "/")) {
@@ -22,5 +22,5 @@ if (!endsWith(pathToSourceFiles, "/")) {
 .libPaths(c(pathToLibraries, .libPaths()));
 
 source(paste(pathToSourceFiles, "Visualizer.R", sep=""));
-visualize(pathToFiles, pathToSourceFiles, pathToLibraries, featureModel = pathFeatureModel)
+visualize(pathToFiles, pathToSourceFiles, pathToLibraries, valueDomain = pathValueDomain)
 
