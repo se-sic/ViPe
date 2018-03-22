@@ -21,7 +21,7 @@ The tool is executed by invoking the file
 
 To execute ViPe, certain program arguments are needed, which are as follows:
 ```
-<PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PathToVM] [PerformInstallation]
+<PathToDirectoryWithCsvFiles> <PathToLibDir> [PathToRscript] [PathToVD] [PerformInstallation]
 ```
 , where:
 * **PathToDirectoryWithCsvFiles** is the path to the directory containing the performance models as .csv-files (see [CSV File](#csv-file)).
