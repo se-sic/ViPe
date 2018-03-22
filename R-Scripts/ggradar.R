@@ -23,6 +23,7 @@
 # 13.02.2018: Improved the legend box and color palette
 # 23.02.2018: Added information from the domain of the variables
 # 20.03.2018: Removed some debug-statements
+# 21.03.2018: Removed some comments
 
 
 ggradar <- function(plot.data,
@@ -65,8 +66,6 @@ ggradar <- function(plot.data,
                              pathToLibrary) {
 
   library("ggplot2", lib.loc=pathToLibrary)
-  # Retrieve the location of the script
-  #script.dir <- dirname(sys.frame(1)$ofile)
   # Load the script containing commonly used functions
   source(paste(pathOfSourceFiles, "common.R", sep=""))
   library("grDevices", lib.loc=pathToLibrary)
@@ -76,12 +75,12 @@ ggradar <- function(plot.data,
   colorsVector <- rainbow(numberModels)
   
   #generate pictures for latex 
-  templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
+  templateColorCirclePath <- paste(pathOfSourceFiles,"/Resources/FirstColor.png", sep="")
   library("magick", lib.loc=pathToLibrary)
   for(i in 1:numberModels) {
     templateColorCircle <- image_read(templateColorCirclePath)
     templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
-    image_write(templateColorCircle, path = paste(pathToSourceFiles,"/Resources/Color", i,".png", sep=""))
+    image_write(templateColorCircle, path = paste(pathOfSourceFiles,"/Resources/Color", i,".png", sep=""))
   }
   
   plot.data <- as.data.frame(plot.data)

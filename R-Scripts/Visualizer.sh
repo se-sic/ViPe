@@ -5,7 +5,7 @@ function printUsage {
 	echo "PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
 	echo "PathToLibDir is the path where the libraries should be stored.";
 	echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
-	echo "PathToVM is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or NONE to indicate that no file exists.";
+	echo "PathToVM is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or 'NONE' to indicate that no file exists.";
 	echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
 }
 

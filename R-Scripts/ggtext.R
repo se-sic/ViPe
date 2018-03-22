@@ -1,6 +1,5 @@
 #' ggtext
 #' @author Christian Kaltenecker
-#' @export ggtext
 
 ggtext <- function(plot.data,
                    text.font = "Circular Air Light",
@@ -9,9 +8,9 @@ ggtext <- function(plot.data,
                    group.point.size = 6,
                    label.size = 4,
                    colours = c("#4045FF", "#FFB400"),
-                   legend.title="",
-                   legend.text.size = text.size,
-                   legend.labels=c("Perf1 (left)", "Perf2 (right)"),
+                   #legend.title="",
+                   #legend.text.size = text.size,
+                   #legend.labels=c("Perf1 (left)", "Perf2 (right)"),
                    pathOfSourceFiles,
                    pathToLibrary) 
 {
