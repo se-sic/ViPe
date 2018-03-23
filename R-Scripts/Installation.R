@@ -1,6 +1,7 @@
 # Install ggplot2
 installNeededPackages <- function(path) {
   #.libPaths(c(path, .libPaths()));
+  install.packages("stringr", lib=path, repos="https://cran.uni-muenster.de/")
 
   install.packages("ggplot2", lib=path, repos="https://cran.uni-muenster.de/")
   install.packages("gridExtra", lib=path, repos="https://cran.uni-muenster.de/")

@@ -24,6 +24,7 @@
 # 23.02.2018: Added information from the domain of the variables
 # 20.03.2018: Removed some debug-statements
 # 21.03.2018: Removed some comments
+# 23.03.2018: Added space in comment
 
 
 ggradar <- function(plot.data,
@@ -96,7 +97,7 @@ ggradar <- function(plot.data,
   plot.extent.x=(grid.max+abs(centre.y))*plot.extent.x.sf
   plot.extent.y=(grid.max+abs(centre.y))*plot.extent.y.sf
 
-  #Check supplied data makes sense
+  # Check supplied data makes sense
   if (length(axis.labels) != ncol(plot.data)-1) 
     return("Error: 'axis.labels' contains the wrong number of axis labels") 
   if(min(plot.data[,-1])<centre.y)

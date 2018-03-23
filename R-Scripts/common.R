@@ -153,3 +153,11 @@ breakText <- function(text, rightAlign=FALSE, includePreceedingPhantom=TRUE) {
   }
   return(result);
 }
+
+WriteToFile <- function(filePath, stringsToWrite) {
+  fileConn <- file(filePath)
+  
+  writeLines(stringsToWrite, fileConn)
+  
+  close(fileConn)
+}
