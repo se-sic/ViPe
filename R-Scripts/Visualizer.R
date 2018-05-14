@@ -56,14 +56,13 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
     options <- vector(mode="character", length=0)
     values <- vector(mode="numeric", length=0)
-    
     for (i in 1:length(lines)) {
       
       keyAndValue = unlist(strsplit(lines[i], "[=]"))
       options <- c(options, keyAndValue[1])
       valueRange <- unlist(strsplit(unlist(strsplit(keyAndValue[2], "[[]"))[2], "[]]"))[1]
       UpperAndLower <- unlist(strsplit(valueRange, "[,]"))
-      valueAdjust <- as.numeric(UpperAndLower[1]) - as.numeric(UpperAndLower[2])
+      valueAdjust <- as.numeric(UpperAndLower[2]) - as.numeric(UpperAndLower[1])
       values <- c(values, valueAdjust)
       
     }
@@ -71,7 +70,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     names(values) <- options
     
     for(i in 2:length(performanceModels)) {
-      
       interaction <- colnames(performanceModels)[i]
       
       if (grepl(interaction, pattern="\\*") || grepl(interaction, pattern="log")) {
@@ -91,11 +89,11 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
             
           }
           
-          for (j in 1:nrow(performanceModels)) {
-            
-            performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
-            
-          }
+        }
+        for (j in 1:nrow(performanceModels)) {
+          
+          performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
+          
         }
       } else {
         
