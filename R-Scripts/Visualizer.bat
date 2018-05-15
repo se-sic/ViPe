@@ -16,7 +16,7 @@ set pathToLibDir="%2"
 
 set pathToRscript="%3"
 
-set pathToVM =  "%4"
+set pathToVM="%4"
 
 set currentDirectory=%cd%
 
@@ -54,7 +54,6 @@ pdflatex StarPlot.tex
 pdfcrop StarPlot.pdf StarPlot.pdf
 pdflatex TextPlot.tex	
 pdfcrop TextPlot.pdf TextPlot.pdf
-
 :: Remove temporary files that are no longer needed
 ::rm StarPlot_1.pdf
 ::rm TextPlot_1.pdf
