@@ -48,6 +48,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       performanceModels <- rbind(performanceModels, performanceModel)
     }
   }
+  
+  # A list containing the alternatives
+  alternatives <- list()
 
   # consider adjusting influences to the value range of the configuration
   if (valueDomain != "" && valueDomain != "NONE") {
@@ -57,13 +60,27 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     options <- vector(mode="character", length=0)
     values <- vector(mode="numeric", length=0)
     for (i in 1:length(lines)) {
-      
       keyAndValue = unlist(strsplit(lines[i], "[=]"))
-      options <- c(options, keyAndValue[1])
-      valueRange <- unlist(strsplit(unlist(strsplit(keyAndValue[2], "[[]"))[2], "[]]"))[1]
-      UpperAndLower <- unlist(strsplit(valueRange, "[,]"))
-      valueAdjust <- as.numeric(UpperAndLower[2]) - as.numeric(UpperAndLower[1])
-      values <- c(values, valueAdjust)
+      
+      # One line can consist of multiple alternative configuration options
+      allOptions <- unlist(strsplit(keyAndValue[1], "[,]"))
+      
+      # Add all options except the first one to the list
+      # This will be used to replace the other option names
+      # by the first one.
+      if (length(allOptions) > 1) {
+        for (j in 2:length(allOptions)) {
+          alternatives[[allOptions[j]]] <- allOptions[1]
+        }
+      }
+      
+      for (j in 1:length(allOptions)) {
+        options <- c(options, allOptions[j])
+        valueRange <- unlist(strsplit(unlist(strsplit(keyAndValue[2], "[[]"))[2], "[]]"))[1]
+        UpperAndLower <- unlist(strsplit(valueRange, "[,]"))
+        valueAdjust <- as.numeric(UpperAndLower[2]) - as.numeric(UpperAndLower[1])
+        values <- c(values, valueAdjust)
+      }
       
     }
     
@@ -108,11 +125,17 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
   }
   
-  #for(i in 2:length(performanceModels)) {
-  #    print(performanceModels[i])
-  #    print(colnames(performanceModels)[i])
-  #}
+  # TODO: Combine the alternatives here
+  # 1. Replace the names
   
+  # 2. Search for common names 
+  
+  # TODO: Don't forget the order
+  
+  # 3. Create a new list of lists of vectors that stores the values from the common columns in a vector
+  
+  
+  # TODO: Adjust the following lines
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
   } else {
@@ -122,6 +145,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
   }
+  
+  # TODO: Adjust the following scripts
   
   if (length(unique(performanceModels$Group)) < 3) {
     source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
