@@ -23,7 +23,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   # The path to the working directory
   #path <- "C:/Users/chris_000/Desktop/Uni/ViPe/Examples/"
   setwd(pathToExampleFiles);
-
+  
   performanceModels <- NULL;
   
   # Find all csv files in the current directory
@@ -51,7 +51,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   
   # A list containing the alternatives
   alternatives <- list()
-
+  hasAlternatives <- FALSE
+  
   # consider adjusting influences to the value range of the configuration
   if (valueDomain != "" && valueDomain != "NONE") {
     vdFile <- file(valueDomain, open='r')
@@ -69,6 +70,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       # This will be used to replace the other option names
       # by the first one.
       if (length(allOptions) > 1) {
+        hasAlternatives <- TRUE
         for (j in 2:length(allOptions)) {
           alternatives[[allOptions[j]]] <- allOptions[1]
         }
@@ -125,15 +127,60 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
   }
   
-  # TODO: Combine the alternatives here
-  # 1. Replace the names
-  
-  # 2. Search for common names 
-  
-  # TODO: Don't forget the order
-  
-  # 3. Create a new list of lists of vectors that stores the values from the common columns in a vector
-  
+  if (hasAlternatives) {
+    # TODO: Combine the alternatives here
+    # 1. Replace the names
+    allTerms <- names(performanceModels)[-1]
+    for (i in 1:length(alternatives)) {
+      wordToReplace <- names(alternatives)[i]
+      replaceBy <- alternatives[[wordToReplace]]
+      allTerms <- gsub(wordToReplace, replaceBy, allTerms, fixed=TRUE)
+    }
+    
+    
+    # 2. Search for common names 
+    
+    # Extract the duplicates
+    # TODO: Order?
+    duplicates <- allTerms[duplicated(allTerms)]
+    
+    if (length(duplicates) == 0) {
+      hasAlternatives <- FALSE
+    } else {
+      # 3. Create a new list of lists of vectors that stores the values from the common columns in a vector
+      newPerformanceModels <- list()
+      columnNames <- unique(allTerms)
+      newPerformanceModels[]
+      for (i in 2:length(columnNames)) {
+        newPerformanceModels[[i]] <- list()
+      }
+      names(newPerformanceModels) <- columnNames
+      
+      for (model in 1:length(performanceModels[[1]])) {
+        # Set the name of the group
+        newPerformanceModels[[1]][[model]] <- performanceModels[[1]][model]
+        handled <- c()
+        # Set the other values
+        for (i in 2:length(newPerformanceModels)) {
+          currentColumn <- columnNames[i]
+          if (currentColumn %in% duplicates && !(currentColumn %in% handled)) {
+            handled <- c(handled, currentColumn)
+            indices <- currentColumn == allTerms
+            indices <- which(indices)
+            values <- c()
+            for (index in 1:length(indices)) {
+              values <- c(values, performanceModels[[indices[index] + 1]][model])
+            }
+          } else {
+            values <- c(performanceModels[[currentColumn]][model])
+          }
+          if (length(values) > 0) {
+            newPerformanceModels[[currentColumn]][[model]] <- values
+          }
+        }
+      }
+    }
+  }
   
   # TODO: Adjust the following lines
   if (doMeanNormalization) {
