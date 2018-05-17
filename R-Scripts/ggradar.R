@@ -197,6 +197,32 @@ SplitInHalf <- function(vector) {
 }
 
 GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
+  
+  # dynmaically scale the text size depending on the number of interactions and textsize of the biggest interaction. Can at lowest be 0.5 of the original size.
+  scaleFactor <- 1
+  if (length(axis.labels) > 10) {
+    scaleFactor <- scaleFactor - (length(axis.labels)/60);
+    longestLabel <-"";
+    for (label in axis.labels) {
+      if (length(label) > length(longestLabel)) {
+        longestLabel <- label
+      }
+    }
+    scaleFactor <- scaleFactor - ((length(longestLabel)/500))
+    if (scaleFactor < 0.5) {
+      scaleFactor <- 0.5
+    }
+  }
+  
+  # dynamically scale the radius of the text for large influence models. Radius can at max be 1.5 times of the default value
+  radiusScale <- 1
+  if (scaleFactor < 1) {
+    radiusScale <- (0.95/scaleFactor)%%(1.5 * 3.3)
+    if (radiusScale < 1) {
+      radiusScale <- 1
+    }
+  }
+  
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -214,7 +240,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "",
     "\t\\newcommand{\\centerX}{9.22}",
     "\t\\newcommand{\\centerY}{-7}",
-    "\t\\newcommand{\\radius}{3.3}",
+    paste("\t\\newcommand{\\radius}{",radiusScale*3.3,"}"),
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
@@ -281,14 +307,12 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                  ""
                ));
   
-  
   content <- c(content,
                c(
                  "",
                  "\t\\begin{tikzpicture}",
                  paste("\t\t\\node[inner sep=0, anchor=north west] (pic) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep="")
                ));
-  
   for (i in 1:numberLabels) {
     if (i == 1) {
       nodeProp <- "anchor=south"
@@ -302,7 +326,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     
     content <- c(content, 
                  c(
-                   paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
+                   paste("\t\t\\node[inner sep=0,scale=", scaleFactor," ,", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
                  ))
   }
   
@@ -328,10 +352,22 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                          paste("\t\t\\node[inner sep=0, anchor=south west, align=center, right = 0.1 of Color",i,"] (Color",i,") {", titles[i], "};", sep="")
                          )
     }
+    
+    # dynamically adjust the width of the legend box
+    longestTitle <- ""
+    for (titleName in titles) {
+      if (length(titleName) > length(longestTitle)) {
+        longestTitle <- titleName;
+      }
+    }
+    normalizedTitle <-""
+    if (length(longestTitle) > 4) 
+      normalizedTitles <- substring(longestTitle, 5, length(longestTitle))
+    
     legendContent <- c(legendContent, 
                        "",
                        "\t\t% Draw legend box",
-                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
+                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea + \\widthof{",normalizedTitle,"}, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
                        "")
   } else {
     legendContent <- c(legendContent, 
