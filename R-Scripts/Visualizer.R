@@ -126,9 +126,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     } 
     
   }
+  alternativeList<- NULL
   
   if (hasAlternatives) {
-    # TODO: Combine the alternatives here
     # 1. Replace the names
     allTerms <- names(performanceModels)[-1]
     for (i in 1:length(alternatives)) {
@@ -147,59 +147,52 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     if (length(duplicates) == 0) {
       hasAlternatives <- FALSE
     } else {
-      # 3. Create a new list of lists of vectors that stores the values from the common columns in a vector
-      newPerformanceModels <- list()
-      columnNames <- unique(allTerms)
-      newPerformanceModels[]
-      for (i in 2:length(columnNames)) {
-        newPerformanceModels[[i]] <- list()
-      }
-      names(newPerformanceModels) <- columnNames
+      # 3. Replace the values from the affected columns
+      alternatives <- list()
+      columnNames <- allTerms
+      columnsToRemove <- c()
       
-      for (model in 1:length(performanceModels[[1]])) {
-        # Set the name of the group
-        newPerformanceModels[[1]][[model]] <- performanceModels[[1]][model]
+      for (i in 1:nrow(performanceModels)) {
         handled <- c()
-        # Set the other values
-        for (i in 2:length(newPerformanceModels)) {
-          currentColumn <- columnNames[i]
+        alternativeList[[i]] <- list()
+        for (j in 1:ncol(performanceModels)) {
+          currentColumn <- columnNames[j]
           if (currentColumn %in% duplicates && !(currentColumn %in% handled)) {
             handled <- c(handled, currentColumn)
-            indices <- currentColumn == allTerms
+            indices <- currentColumn == columnNames
             indices <- which(indices)
+            columnsToRemove <- c(columnsToRemove, indices[-1] + 1)
             values <- c()
-            for (index in 1:length(indices)) {
-              values <- c(values, performanceModels[[indices[index] + 1]][model])
+            for (k in 1:length(indices)) {
+              values <- c(values, performanceModels[i, indices[k] + 1])
             }
-          } else {
-            values <- c(performanceModels[[currentColumn]][model])
-          }
-          if (length(values) > 0) {
-            newPerformanceModels[[currentColumn]][[model]] <- values
+            performanceModels[i, indices[k]] <- mean(values)
+            alternativeList[[i]][[currentColumn]] <- values
           }
         }
       }
+      
+      # 4. Remove the columns
+      performanceModels <- performanceModels[,-columnsToRemove]
     }
   }
   
-  # TODO: Adjust the following lines
+
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
   } else {
-    # Find the maximum and minimum value
+    # Find the maximum value
     maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
-    minimumValue <- -maximumValue;
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
   }
-  
-  # TODO: Adjust the following scripts
   
   if (length(unique(performanceModels$Group)) < 3) {
     source(paste(pathOfSourceFiles, "ggtext.R", sep=""))
     ggtext(performanceModels, text.font = "sans", text.size=14, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary) 
   }
   source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
-  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, legend.text.size=14, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary)
+  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, legend.text.size=14, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary, alternatives=alternativeList)
   ggsave("StarPlot_1.pdf", height=8.5, width=11, p)
+  
 }

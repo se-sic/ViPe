@@ -1,3 +1,3 @@
-Group;root;NewRatio;NewRatio*UseAdaptiveSizePolicy;NewRatio*NewRatio*UseAdaptiveSizePolicy;NewRatio*log(NewRatio);NewRatio*log(NewRatio)*log(MaxTenuringThreshold);NewRatio*UseAdaptiveSizePolicy*NewRatio*log(SurvivorRatio);UseAdaptiveSizePolicy;DisableExplicitGC;log(MaxTenuringThreshold)
-A;24.33;1.13;15.13;-0.047;0;0;-0.18;-17.12;5.11;-2.81
-B;30.11;3.4;-1.2;-7;0;4;-1.81;12.51;7.31;-10.11
+Group;root;NewRatio;NewRatio*UseAdaptiveSizePolicy;NewRatio*NewRatio*UseAdaptiveSizePolicy;NewRatio*log(NewRatio);NewRatio*log(NewRatio)*log(MaxTenuringThreshold);NewRatio*UseAdaptiveSizePolicy*NewRatio*log(SurvivorRatio);UseAdaptiveSizePolicy;DisableExplicitGC;log(MaxTenuringThreshold);Alternative1;Alternative2
+A;24.33;1.13;15.13;-0.047;0;0;-0.18;-17.12;5.11;-2.81;6;-1
+B;30.11;3.4;-1.2;-7;0;4;-1.81;12.51;7.31;-10.11;8;0

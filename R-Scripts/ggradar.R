@@ -62,7 +62,8 @@ ggradar <- function(plot.data,
                              legend.text.size=9,
                              line.offset = 0.5,
                              pathOfSourceFiles,
-                             pathToLibrary) {
+                             pathToLibrary, 
+                             alternatives=NULL) {
 
   library("ggplot2", lib.loc=pathToLibrary)
   # Retrieve the location of the script
@@ -76,12 +77,12 @@ ggradar <- function(plot.data,
   colorsVector <- rainbow(numberModels)
   
   #generate pictures for latex 
-  templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
+  templateColorCirclePath <- paste(pathOfSourceFiles,"/Resources/FirstColor.png", sep="")
   library("magick", lib.loc=pathToLibrary)
   for(i in 1:numberModels) {
     templateColorCircle <- image_read(templateColorCirclePath)
     templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
-    image_write(templateColorCircle, path = paste(pathToSourceFiles,"/Resources/Color", i,".png", sep=""))
+    image_write(templateColorCircle, path = paste(pathOfSourceFiles,"/Resources/Color", i,".png", sep=""))
   }
   
   plot.data <- as.data.frame(plot.data)
@@ -410,6 +411,70 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                                    text=as.character(grid.max))
   gridline$mid$label <- data.frame(x=gridline.label.offset,y=grid.mid+abs(centre.y),
                                    text=as.character(grid.mid))
+  
+  # (f) Create Box-Plots if necessary
+  # These plots will be located where the points are located + some (negative/positive) offset 
+  # to avoid overlapping
+  alternativePlots <- NULL
+  alternativeCounter <- 0
+  if (!is.null(alternatives)) {
+    columnNames <- names(plot.data)
+     for (i in 1:length(alternatives)) {
+       alternativeNames <- names(alternatives[[i]])
+       for (j in 1:length(alternatives[[i]])) {
+         alternativeValues <- NULL
+         alternativeValues$y <- alternatives[[i]][[j]]
+         alternativeValues$x <- rep(1, length(alternativeValues$y))
+         
+         # (1) Find out the respective column
+         columnNumber <- which(alternativeNames[j] == columnNames)[i] - 1
+         
+         # (2) Retrieve the angle that is left to the next element
+         angleLeft <- (2 * pi) / max(n.vars, 5)
+         
+         # (3) Calculate the offsets
+         currentAngle <- angles[columnNumber]
+         boxPlotOffset <- c(abs(cos(currentAngle)), abs(sin(currentAngle))) / length(alternatives)
+         
+         
+         # (4) Generate the plots and save them as .pdf-files
+         # Add transparent background
+         newPlot <- ggplot() 
+           
+         newPlot <- newPlot + 
+           theme(line = element_blank(),
+                 text = element_blank(),
+                 axis.text.y=element_blank(),
+                 axis.text.x=element_blank(),
+                 axis.ticks=element_blank(),
+                 panel.background = element_rect(fill="transparent", colour=NA),
+                 panel.grid.minor = element_blank(), 
+                 panel.grid.major = element_blank(),
+                 plot.background = element_rect(fill = "transparent",colour = NA)
+           )
+         
+         # TODO: Specify minimum and maximum value
+         # TODO: Add the right color
+         # TODO: Add whiskers and remove outlier
+         
+         
+         newPlot <- newPlot +
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y))
+         
+         ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=11, newPlot)
+         alternativeCounter <- alternativeCounter + 1
+         alternativePlots$Plot <- c(alternativePlots$Plot, paste("Alternative_", alternativeCounter,".pdf", sep=""))
+         
+         # TODO:  tNow add the angle and the coordinates
+                    
+         
+         
+         # (5) Pass the arguments to the texgenerator
+         
+       }
+     }
+  }
+  
   #print(gridline$min$label)
   #print(gridline$max$label)
   #print(gridline$mid$label)
