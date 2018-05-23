@@ -503,9 +503,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
          
          newPlot <- newPlot +
                     # Whiskers
-                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar') +
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar', lwd=3) +
                     # outlier.shape additionally removes outliers
-                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), outlier.shape=NA) +
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), outlier.shape=NA, lwd=3) +
                     ylim(-1,1)
                     
          ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
