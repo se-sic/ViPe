@@ -180,11 +180,25 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
 
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
+    
+    if (hasAlternatives) {
+      # TODO
+    }
+    
   } else {
     # Find the maximum value
     maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
+    
+    if (hasAlternatives) {
+      for (i in 1:length(alternativeList)) {
+        for (j in 1:length(alternativeList[[i]])){
+          alternativeList[[i]][[j]] <- alternativeList[[i]][[j]] / maximumValue
+        }
+      }
+    }
+    
   }
   
   if (length(unique(performanceModels$Group)) < 3) {

@@ -23,7 +23,9 @@
 # 13.02.2018: Improved the legend box and color palette
 # 23.02.2018: Added information from the domain of the variables
 # 20.03.2018: Removed some debug-statements
-
+# 16.05.2018: Fixed a few bugs and made the first step to handle alternatives
+# 17.05.2018: Inserted pre-processing step
+# 22.05.2018: Added box-plot export
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -197,7 +199,7 @@ SplitInHalf <- function(vector) {
   return(result);
 }
 
-GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, alternativePlots) {
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -416,6 +418,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   # These plots will be located where the points are located + some (negative/positive) offset 
   # to avoid overlapping
   alternativePlots <- NULL
+  alternativePlots$Plot <- c()
+  alternativePlots$Column <- c()
+  
   alternativeCounter <- 0
   if (!is.null(alternatives)) {
     columnNames <- names(plot.data)
@@ -453,23 +458,24 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                  plot.background = element_rect(fill = "transparent",colour = NA)
            )
          
-         # TODO: Specify minimum and maximum value
-         # TODO: Add the right color
-         # TODO: Add whiskers and remove outlier
-         
          
          newPlot <- newPlot +
-                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y))
-         
-         ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=11, newPlot)
-         alternativeCounter <- alternativeCounter + 1
-         alternativePlots$Plot <- c(alternativePlots$Plot, paste("Alternative_", alternativeCounter,".pdf", sep=""))
-         
-         # TODO:  tNow add the angle and the coordinates
+                    # Whiskers
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar') +
+                    # outlier.shape additionally removes outliers
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), outlier.shape=NA) +
+                    ylim(-1,1)
                     
+         ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
+         alternativeCounter <- alternativeCounter + 1
+         
+         alternativePlots$Plot <- c(alternativePlots$Plot, paste("Alternative_", alternativeCounter,".pdf", sep=""))
+         alternativePlots$Column <- c(alternativePlots$Column, columnNumber)
+         
+         # TODO: Now add the angle and the coordinates
          
          
-         # (5) Pass the arguments to the texgenerator
+         # (5) Pass the arguments to the LaTeX generator
          
        }
      }
@@ -604,7 +610,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 
   #theme(legend.title=element_blank())
-  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1])
+  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1], alternativePlots)
 
   return(base)
 
