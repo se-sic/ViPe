@@ -221,6 +221,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
+    "\t\\newcommand{\\alternativeHeight}{85px}",
     ""
   );
   
@@ -229,7 +230,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   
   content <- c(content, 
                c(
-                 paste("\t\\newcommand{\\angleDiff}{360 / ", numberLabels, "}", sep ="")
+                 paste("\t\\newcommand{\\angleDiff}{360 / ", numberLabels, "}", sep =""),
+                 "\t\\pgfmathsetmacro\\distance{2 * \\PI * \\radius * \\angleDiff / 360 / 2}"
                ))
   
   prefixes <- c(letters, LETTERS);
@@ -257,6 +259,35 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                    xCoordinateLabel,
                    yCoordinateLabel
                  ))
+    
+    # Add the box plots if there are any
+    if (!is.null(alternativePlots) && i %in% alternativePlots$Column) {
+      indices <- which(i == alternativePlots$Column)
+      numberIndices <- length(indices)
+      if (numberIndices == 1) {
+        xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        content <- c(content, 
+                     c(
+                       xCoordinateLabel,
+                       yCoordinateLabel
+                     ))
+      } else {
+        for (j in 1:numberIndices) {
+          xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", sep="");
+          yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}", sep="");
+          content <- c(content, 
+                       c(
+                         xCoordinateLabel,
+                         yCoordinateLabel
+                       ))
+        }
+      }
+    }
   }
   
   content <- c(content, 
@@ -307,6 +338,17 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                  c(
                    paste("\t\t\\node[inner sep=0, ", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
                  ))
+    
+    if (!is.null(alternativePlots) && i %in% alternativePlots$Column) {
+      indices <- which(i == alternativePlots$Column)
+      numberIndices <- length(indices)
+      for (j in 1:numberIndices) {
+        content <- c(content, 
+                     c(
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[j],"}};", sep="")
+                      ))
+      }
+    }
   }
   
   legendContent <- c("",
@@ -432,7 +474,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
          alternativeValues$x <- rep(1, length(alternativeValues$y))
          
          # (1) Find out the respective column
-         columnNumber <- which(alternativeNames[j] == columnNames)[i] - 1
+         columnNumber <- which(alternativeNames[j] == columnNames)[1] - 1
          
          # (2) Retrieve the angle that is left to the next element
          angleLeft <- (2 * pi) / max(n.vars, 5)
@@ -467,15 +509,10 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                     ylim(-1,1)
                     
          ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
-         alternativeCounter <- alternativeCounter + 1
-         
          alternativePlots$Plot <- c(alternativePlots$Plot, paste("Alternative_", alternativeCounter,".pdf", sep=""))
          alternativePlots$Column <- c(alternativePlots$Column, columnNumber)
          
-         # TODO: Now add the angle and the coordinates
-         
-         
-         # (5) Pass the arguments to the LaTeX generator
+         alternativeCounter <- alternativeCounter + 1
          
        }
      }
@@ -542,7 +579,6 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   base <- base + geom_polygon(data=gridline$min$path,aes(x,y),
                               fill="white",
                               alpha=1)
-  
 
   # + radial axes
   base <- base + geom_path(data=axis$path,aes(x=x,y=y,group=axis.no),
