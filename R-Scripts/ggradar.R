@@ -305,7 +305,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
       if (numberIndices == 1) {
         xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
                                   "}", sep="");
-        yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * sin(\\angleDiff * ", i - 1, ")",
+        yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
                                   "}", sep="");
         content <- c(content, 
                      c(
