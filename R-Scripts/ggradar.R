@@ -223,6 +223,18 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     }
   }
   
+  # dynamically adjust the width of the legend box
+  longestTitle <- ""
+  for (i in 1:length(titles)) {
+    print(titles[i])
+    if (nchar(paste(titles[i])) > nchar(longestTitle)) {
+      longestTitle <- paste(titles[i]);
+    }
+  }
+  normalizedTitle <-""
+  if (nchar(longestTitle) > 5)
+    normalizedTitle <- substring(longestTitle, 5, nchar(longestTitle))
+  
   content <- c(
     "\\documentclass{standalone}",
     "",
@@ -244,7 +256,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
-    ""
+    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/9,"}"),
+          ""
   );
   
   # Create pgf macros for the coordinates
@@ -353,27 +366,16 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                          )
     }
     
-    # dynamically adjust the width of the legend box
-    longestTitle <- ""
-    for (titleName in titles) {
-      if (length(titleName) > length(longestTitle)) {
-        longestTitle <- titleName;
-      }
-    }
-    normalizedTitle <-""
-    if (length(longestTitle) > 4) 
-      normalizedTitles <- substring(longestTitle, 5, length(longestTitle))
-    
     legendContent <- c(legendContent, 
                        "",
                        "\t\t% Draw legend box",
-                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea + \\widthof{",normalizedTitle,"}, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
+                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea + \\legendWidth, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
                        "")
   } else {
     legendContent <- c(legendContent, 
                        "",
                        "\t\t% Draw legend box",
-                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea)$);",
+                       "\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea + \\legendWidth, -\\outerMarginArea)$);",
                        "")
   }
   
