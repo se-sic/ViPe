@@ -23,7 +23,9 @@
 # 13.02.2018: Improved the legend box and color palette
 # 23.02.2018: Added information from the domain of the variables
 # 20.03.2018: Removed some debug-statements
-
+# 16.05.2018: Fixed a few bugs and made the first step to handle alternatives
+# 17.05.2018: Inserted pre-processing step
+# 22.05.2018: Added box-plot export
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -62,7 +64,8 @@ ggradar <- function(plot.data,
                              legend.text.size=9,
                              line.offset = 0.5,
                              pathOfSourceFiles,
-                             pathToLibrary) {
+                             pathToLibrary, 
+                             alternatives=NULL) {
 
   library("ggplot2", lib.loc=pathToLibrary)
   # Retrieve the location of the script
@@ -76,12 +79,12 @@ ggradar <- function(plot.data,
   colorsVector <- rainbow(numberModels)
   
   #generate pictures for latex 
-  templateColorCirclePath <- paste(pathToSourceFiles,"/Resources/FirstColor.png", sep="")
+  templateColorCirclePath <- paste(pathOfSourceFiles,"/Resources/FirstColor.png", sep="")
   library("magick", lib.loc=pathToLibrary)
   for(i in 1:numberModels) {
     templateColorCircle <- image_read(templateColorCirclePath)
     templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
-    image_write(templateColorCircle, path = paste(pathToSourceFiles,"/Resources/Color", i,".png", sep=""))
+    image_write(templateColorCircle, path = paste(pathOfSourceFiles,"/Resources/Color", i,".png", sep=""))
   }
   
   plot.data <- as.data.frame(plot.data)
@@ -196,7 +199,7 @@ SplitInHalf <- function(vector) {
   return(result);
 }
 
-GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, alternativePlots) {
   
   # dynmaically scale the text size depending on the number of interactions and textsize of the biggest interaction. Can at lowest be 0.5 of the original size.
   scaleFactor <- 1
@@ -256,8 +259,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
-    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/9,"}"),
-          ""
+    "\t\\newcommand{\\alternativeHeight}{85px}",
+    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/9,"}"),          ""
   );
   
   # Create pgf macros for the coordinates
@@ -265,7 +268,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   
   content <- c(content, 
                c(
-                 paste("\t\\newcommand{\\angleDiff}{360 / ", numberLabels, "}", sep ="")
+                 paste("\t\\newcommand{\\angleDiff}{360 / ", numberLabels, "}", sep =""),
+                 "\t\\pgfmathsetmacro\\distance{2 * \\PI * \\radius * \\angleDiff / 360 / 2}"
                ))
   
   prefixes <- c(letters, LETTERS);
@@ -293,6 +297,35 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                    xCoordinateLabel,
                    yCoordinateLabel
                  ))
+    
+    # Add the box plots if there are any
+    if (!is.null(alternativePlots) && i %in% alternativePlots$Column) {
+      indices <- which(i == alternativePlots$Column)
+      numberIndices <- length(indices)
+      if (numberIndices == 1) {
+        xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        content <- c(content, 
+                     c(
+                       xCoordinateLabel,
+                       yCoordinateLabel
+                     ))
+      } else {
+        for (j in 1:numberIndices) {
+          xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", sep="");
+          yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}", sep="");
+          content <- c(content, 
+                       c(
+                         xCoordinateLabel,
+                         yCoordinateLabel
+                       ))
+  }
+      }
+    }
   }
   
   content <- c(content, 
@@ -341,6 +374,17 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                  c(
                    paste("\t\t\\node[inner sep=0,scale=", scaleFactor," ,", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
                  ))
+    
+    if (!is.null(alternativePlots) && i %in% alternativePlots$Column) {
+      indices <- which(i == alternativePlots$Column)
+      numberIndices <- length(indices)
+      for (j in 1:numberIndices) {
+        content <- c(content, 
+                     c(
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[j],"}};", sep="")
+                      ))
+  }
+    }
   }
   
   legendContent <- c("",
@@ -448,6 +492,69 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
                                    text=as.character(grid.max))
   gridline$mid$label <- data.frame(x=gridline.label.offset,y=grid.mid+abs(centre.y),
                                    text=as.character(grid.mid))
+  
+  # (f) Create Box-Plots if necessary
+  # These plots will be located where the points are located + some (negative/positive) offset 
+  # to avoid overlapping
+  alternativePlots <- NULL
+  alternativePlots$Plot <- c()
+  alternativePlots$Column <- c()
+  
+  alternativeCounter <- 0
+  if (!is.null(alternatives)) {
+    columnNames <- names(plot.data)
+     for (i in 1:length(alternatives)) {
+       alternativeNames <- names(alternatives[[i]])
+       for (j in 1:length(alternatives[[i]])) {
+         alternativeValues <- NULL
+         alternativeValues$y <- alternatives[[i]][[j]]
+         alternativeValues$x <- rep(1, length(alternativeValues$y))
+         
+         # (1) Find out the respective column
+         columnNumber <- which(alternativeNames[j] == columnNames)[1] - 1
+         
+         # (2) Retrieve the angle that is left to the next element
+         angleLeft <- (2 * pi) / max(n.vars, 5)
+         
+         # (3) Calculate the offsets
+         currentAngle <- angles[columnNumber]
+         boxPlotOffset <- c(abs(cos(currentAngle)), abs(sin(currentAngle))) / length(alternatives)
+         
+         
+         # (4) Generate the plots and save them as .pdf-files
+         # Add transparent background
+         newPlot <- ggplot() 
+           
+         newPlot <- newPlot + 
+           theme(line = element_blank(),
+                 text = element_blank(),
+                 axis.text.y=element_blank(),
+                 axis.text.x=element_blank(),
+                 axis.ticks=element_blank(),
+                 panel.background = element_rect(fill="transparent", colour=NA),
+                 panel.grid.minor = element_blank(), 
+                 panel.grid.major = element_blank(),
+                 plot.background = element_rect(fill = "transparent",colour = NA)
+           )
+         
+         
+         newPlot <- newPlot +
+                    # Whiskers
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar', lwd=3) +
+                    # outlier.shape additionally removes outliers
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), outlier.shape=NA, lwd=3) +
+                    ylim(-1,1)
+                    
+         ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
+         alternativePlots$Plot <- c(alternativePlots$Plot, paste("Alternative_", alternativeCounter,".pdf", sep=""))
+         alternativePlots$Column <- c(alternativePlots$Column, columnNumber)
+         
+         alternativeCounter <- alternativeCounter + 1
+         
+       }
+     }
+  }
+  
   #print(gridline$min$label)
   #print(gridline$max$label)
   #print(gridline$mid$label)
@@ -509,7 +616,6 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   base <- base + geom_polygon(data=gridline$min$path,aes(x,y),
                               fill="white",
                               alpha=1)
-  
 
   # + radial axes
   base <- base + geom_path(data=axis$path,aes(x=x,y=y,group=axis.no),
@@ -577,7 +683,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 
   #theme(legend.title=element_blank())
-  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1])
+  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1], alternativePlots)
 
   return(base)
 
