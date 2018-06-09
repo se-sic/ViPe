@@ -1,42 +1,59 @@
-setlocal enabledelayedexpansion
 @echo off
 
-set argC=0
-for %%x in (%*) do Set /A argC+=1
-echo %argc%
-if %argc% LSS 3 (
-	CALL :printUsage
-	set /p temp= "Press enter to continue..."
-	exit 0
+
+:parseargs
+IF NOT "%1"=="" (
+	IF "%1"=="-c" (
+		SET pathToCsvFiles=%2
+		SHIFT
+	)
+	IF "%1"=="-l" (
+		SET pathToLibDir=%2
+		SHIFT
+	)
+	IF "%1"=="-r" (
+		SET pathToRscript=%2
+		SHIFT
+	)
+	IF "%1"=="-v" (
+		SET pathToVD=%2
+		SHIFT
+	)
+	IF "%1"=="-h" (
+		CALL :printUsage
+		GOTO :end
+	)
+	IF "%1"=="-g" (
+		SET granularity=%2
+		SHIFT
+	)
+	IF "%1"=="-i" (
+		SET INSTALL="TRUE"
+	)
+	SHIFT
+	GOTO :parseargs
 )
 
-set pathToCsvFiles=%1
-
-set pathToLibDir="%2"
-
-set pathToRscript="%3"
-
-set pathToVM="%4"
-
-set currentDirectory=%cd%
-
+SET currentDirectory=%cd%
 echo Current directory: %currentDirectory%
 echo %pathToVM%
-if "%argc%" EQU "5" (
-	:: Perform installation
-	echo %pathToRscript% %currentDirectory%\InstallationWrapper.R %pathToLibDir% %currentDirectory%
-	"%pathToRscript%" %currentDirectory%\InstallationWrapper.R "%pathToLibDir%" "%currentDirectory%"
+IF NOT "%INSTALL%"=="" ( 
+	if "%INSTALL%"==""TRUE"" (
+		:: Perform installation
+		echo %pathToRscript% %currentDirectory%\InstallationWrapper.R %pathToLibDir% %currentDirectory%
+		%pathToRscript% %currentDirectory%\InstallationWrapper.R %pathToLibDir% %currentDirectory%
+	)
 )
 
-if %errorlevel% GTR 0 (
+if "%errorlevel%" GTR 0 (
 	echo [Error] R-script execution failed while installing!
 	set /p temp= "Press enter to continue...
 	exit 1
 )
 
 :: Execute the R-scripts and pass arguments to it
-echo %pathToRscript% %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%" "%pathToVM%"
-"%pathToRscript%" %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%" "%pathToVM%"
+echo %pathToRscript% %currentDirectory%\VisualizationWrapper.R "%pathToCsvFiles%" "%currentDirectory%" "%pathToLibDir%" "%pathToVD%" "%granularity%"
+%pathToRscript% %currentDirectory%\VisualizationWrapper.R %pathToCsvFiles% %currentDirectory% %pathToLibDir% %pathToVD% %granularity%
 
 if %errorlevel% GTR 0 (
 	echo [Error] R-script execution failed!
@@ -69,3 +86,5 @@ echo "PathToLibDir is the path where the libraries should be stored.";
 echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
 echo "PathToVM is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or NONE to indicate that no file exists.";
 echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
+
+:end

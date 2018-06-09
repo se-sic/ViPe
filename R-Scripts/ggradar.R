@@ -77,12 +77,12 @@ ggradar <- function(plot.data,
   #generate dynamic colors for plot
   numberModels <- length(plot.data[,1])
   colorsVector <- rainbow(numberModels)
-  
   #generate pictures for latex 
   templateColorCirclePath <- paste(pathOfSourceFiles,"/Resources/FirstColor.png", sep="")
   library("magick", lib.loc=pathToLibrary)
   for(i in 1:numberModels) {
     templateColorCircle <- image_read(templateColorCirclePath)
+    val <- colorsVector[i]
     templateColorCircle <- image_fill(templateColorCircle, colorsVector[i], point = "+100+40", fuzz = 20)
     image_write(templateColorCircle, path = paste(pathOfSourceFiles,"/Resources/Color", i,".png", sep=""))
   }
@@ -677,8 +677,8 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   theme(legend.text = element_text(size = legend.text.size), legend.position="none") +
   #theme(legend.box.background = element_rect(), legend.box.margin = margin(1,1,1,1)) + # add the box around the legend
   #theme(legend.key.height=unit(2,"line")) +
-  scale_colour_manual(values=rep(c(colorsVector, c( "#007A87",  "#8CE071", "#7B0051", 
-    "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20")), 100)) +
+  scale_colour_manual(values=c(colorsVector, c( "#007A87",  "#8CE071", "#7B0051", 
+    "#00D1C1", "#FFAA91", "#B4A76C", "#9CA299", "#565A5C", "#00A04B", "#E54C20"))) +
   scale_fill_manual(name="", values=c("white"), labels="No occurence") #+
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 

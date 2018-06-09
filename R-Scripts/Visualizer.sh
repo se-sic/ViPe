@@ -9,36 +9,52 @@ function printUsage {
 	echo "PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
 }
 
-if [[ "$#" -lt "2" || "$#" -gt "5"  ]]
-then
+for i in "$@"
+do
+case $i in 
+	-c)
+	pathToCsvFiles="$2"
+	shift
+	shift
+	;;
+	-l)
+	pathToLibDir="$2"
+	shift
+	shift
+	;;
+	-r)
+	pathToRscript="$2"
+	shift
+	shift
+	;;
+	-v)
+	pathToVD="$2"
+	shift
+	shift
+	;;
+	-i)
+	INSTALL="TRUE"
+	shift
+	;;
+	-g)
+	granularity="$2"
+	shift
+	shift
+	;;
+	-h)
 	printUsage
 	read -p "Press enter to continue...";
 	exit 0
-fi
-
-pathToCsvFiles="$1";
-
-pathToLibDir="$2";
+	;;
+	*)
+	printUsage
+	read -p "Press enter to continue...";
+	exit 0
+	;;
+esac
+done
 
 mkdir -p $pathToLibDir
-
-pathToVM=""
-
-if [ "$#" -lt "3" ]
-then
-	pathToRscript="Rscript"
-else 
-	pathToRscript="$3";
-fi
-
-if [[ "$#" -gt "3" ]]; then
-	if [[ "$4" == "NONE" ]]; then
-		pathToVM=""
-	else
-		pathToVM="$4"
-	fi
-fi
-
 # Detect the platform the script is running on
 platform='unknown'
 unamestr=`uname`
@@ -58,11 +74,11 @@ fi
 
 echo "Current directory: $currentDirectory";
 
-if [[ "$#" -eq "5" ]]
+if [[ "$INSTALL" == 'TRUE' ]]
 then
 	# Perform installation
-	echo "$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}" "${pathToVM}"
-	"$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}" "${pathToVM}"
+	echo "$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
+	"$pathToRscript" ${currentDirectory}/InstallationWrapper.R "${pathToLibDir}" "${currentDirectory}"
 fi
 
 if [ "$?" != "0" ]; then
@@ -72,8 +88,8 @@ if [ "$?" != "0" ]; then
 fi
 
 # Execute the R-scripts and pass arguments to it
-echo $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}"
-"$pathToRscript" ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}"
+echo $pathToRscript ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}" "${pathToVD}" "${granularity}"
+"$pathToRscript" ${currentDirectory}/VisualizationWrapper.R "${pathToCsvFiles}" "${currentDirectory}" "${pathToLibDir}" "${pathToVM}" "${pathToVD}" "${granularity}"
 
 if [ "$?" != "0" ]; then
 	echo "[Error] R-script execution failed!";

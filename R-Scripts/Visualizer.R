@@ -176,7 +176,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       performanceModels <- performanceModels[,-columnsToRemove]
     }
   }
-  
 
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
