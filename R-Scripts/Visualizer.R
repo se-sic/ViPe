@@ -11,7 +11,7 @@ meanNormalization <- function(dataToNormalize) {
 }
 
 visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMeanNormalization=FALSE
-                      , valueDomain="") {
+                      , valueDomain="", granularity = "fine") {
   library("ggplot2", lib.loc=pathToLibrary)
   library("labeling", lib.loc=pathToLibrary)
   library("digest", lib.loc=pathToLibrary)
@@ -28,6 +28,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   
   # Find all csv files in the current directory
   csvFiles <- list.files(".", pattern="\\.csv$", recursive = F);
+  
   
   # Parse the performance models
   for (i in 1:length(csvFiles)) {
@@ -49,6 +50,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
   }
   
+  # prepare varibale to store compute polynominal values
+  polynomGroups <- list()
+  
   # A list containing the alternatives
   alternatives <- list()
   hasAlternatives <- FALSE
@@ -59,7 +63,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     lines <- readLines(vdFile)
     
     options <- vector(mode="character", length=0)
-    values <- vector(mode="numeric", length=0)
+    values <- list()
+    completeValueRange <- list()
     for (i in 1:length(lines)) {
       keyAndValue = unlist(strsplit(lines[i], "[=]"))
       
@@ -77,16 +82,131 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       }
       
       for (j in 1:length(allOptions)) {
+        
         options <- c(options, allOptions[j])
         valueRange <- unlist(strsplit(unlist(strsplit(keyAndValue[2], "[[]"))[2], "[]]"))[1]
-        UpperAndLower <- unlist(strsplit(valueRange, "[,]"))
-        valueAdjust <- as.numeric(UpperAndLower[2]) - as.numeric(UpperAndLower[1])
+        allValues <- unlist(strsplit(valueRange, "[,]"))
+        valueAdjust <- as.numeric(allValues[length(allValues)]) - as.numeric(allValues[1])
+        completeValueRange[[length(completeValueRange) + 1]] <- allValues
         values <- c(values, valueAdjust)
+        
       }
       
     }
     
     names(values) <- options
+    names(completeValueRange) <- options
+    
+    # handle polynominals start
+    if (granularity == "coarse") {
+    # compute polynominals
+    polynominals <- list()
+    toIgnore <- vector()
+    for(i in 2:length(performanceModels)) {
+      poly <- colnames(performanceModels)[i]
+      candidate <- c(poly)
+      
+      for(j in (i+1):length(performanceModels)) {
+        if (!(j %in% toIgnore) & j!=i) {
+          variablesOther <- unlist(strsplit(colnames(performanceModels)[j], "[*]"))
+          variablesCandidate <- unlist(strsplit(poly, "[*]"))
+          
+          if (setequal(variablesOther, variablesCandidate)) {
+            candidate <- c(candidate, colnames(performanceModels)[j])
+            toIgnore <- c(toIgnore, j)
+          }
+        }
+      }
+      if (length(candidate) > 1) {
+        polynominals[[length(polynominals) + 1]] = candidate
+      } else if(!(i %in% toIgnore)) {
+        # also add all polynominals with at least one numeric options even if there are no multiple occurrences of similar polys
+        uniqueVariables <- unique(unlist(strsplit(candidate[1], "[*]")))
+        oneNumeric <- FALSE
+        for(var in uniqueVariables) {
+          # if a option dosent have more than 2 possible values it is a binary option
+          if(length(completeValueRange[[var]]) >= 3) {
+            oneNumeric <- TRUE
+          }
+        }
+        
+        if(oneNumeric) {
+          polynominals[[length(polynominals) + 1]] = candidate
+        }
+      }
+    }
+    
+    #clean up and remove polynominals from the other data into a separate list
+    listOfPolynominals <- list()
+    for (i in 1:length(polynominals)) {
+      polyPartNames <- polynominals[i]
+      polynom <- list()
+      for (j in 1:length(polyPartNames[[1]])) {
+        tmp <- polyPartNames[[1]][j]
+        polynom[j] <- performanceModels[tmp]
+        performanceModels[tmp] <- NULL
+      }
+      polyDf <- data.frame(matrix(unlist(polynom), nrow=length(polyPartNames)))
+      TMP <- unlist(performanceModels[["Group"]])
+      rownames(polyDf) <- performanceModels[["Group"]]
+      colnames(polyDf) <- polyPartNames[[1]]
+      listOfPolynominals[[i]] = polyDf
+    }
+    
+    # compute all values for each polynominal
+    groupNames <- vector()
+    #for each polynomGroup for each case study compute all possible values
+    for (i in 1:length(listOfPolynominals)) {
+      groupValues <- list()
+      currentPoly <- listOfPolynominals[[i]]
+      uniqueVariables <- unique(unlist(strsplit(colnames(currentPoly)[1], "[*]")))
+      groupNames <- c(groupNames, paste(uniqueVariables, collapse='*', sep="*"))
+      # for each case study
+      for (j in 1:nrow(currentPoly)) {
+        
+        selectedValues <- vector()
+        #compute all possible value combinations
+        for(variable in uniqueVariables) {
+          if (length(selectedValues) == 0) {
+            selectedValues <- unlist(completeValueRange[variable])
+          } else {
+            combinations <- vector()
+            for (previousSelection in selectedValues) {
+              for (newValue in completeValueRange[variable]) {
+                combinations <- c(combinations, paste(previousSelection, newValue, sep="*"))
+              }
+            }
+            selectedValues <- combinations
+          }
+        }
+        
+        # compute the values of the polynom group
+        computedValues <- vector()
+        for (val in selectedValues) {
+          computedVal <- 0
+          for (z in 1:length(colnames(currentPoly))) {
+            coeff <- currentPoly[j, z]
+            assignedValues <- unlist(strsplit(val, "[*]"))
+            names(assignedValues) <- uniqueVariables
+            #neutral value for multiplication
+            temp <- 1
+            for (option in unlist(strsplit(colnames(currentPoly)[z], "[*]"))) {
+              temp <- temp * as.numeric(assignedValues[option])
+            }
+            temp <- temp * coeff
+            computedVal <- computedVal + temp
+          }
+          computedValues <- c(computedValues, computedVal)
+        }
+        groupValues[[length(groupValues) + 1]] <- computedValues
+      }
+      names(groupValues) <- rownames(currentPoly)
+      polynomGroups[[length(polynomGroups) + 1]] <- groupValues
+    }
+    names(polynomGroups) <- groupNames
+    
+    }
+    # handle polynominals end
     
     for(i in 2:length(performanceModels)) {
       interaction <- colnames(performanceModels)[i]
@@ -100,11 +220,11 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
           
           if (!grepl(variables[x], pattern="log\\(")) {
             
-            valueWeight <- valueWeight * values[gsub("^\\s+|\\s+$", "", variables[x])]
+            valueWeight <- valueWeight * as.numeric(values[gsub("^\\s+|\\s+$", "", variables[x])])
             
           } else {
             
-            valueWeight <- valueWeight * log10(values[gsub("log\\(|\\)$", "",  variables[x])])
+            valueWeight <- valueWeight * log10(as.numeric(values[gsub("log\\(|\\)$", "",  variables[x])]))
             
           }
           
@@ -116,7 +236,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
       } else {
         
-        valueWeight <- values[interaction]
+        valueWeight <- as.numeric(values[interaction])
         for (j in 1:nrow(performanceModels)) {
           
           performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
@@ -176,6 +296,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       performanceModels <- performanceModels[,-columnsToRemove]
     }
   }
+  
 
   if (doMeanNormalization) {
     performanceModels[-1] <- meanNormalization(performanceModels[-1]);
@@ -187,8 +308,38 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   } else {
     # Find the maximum value
     maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
+    for(group in polynomGroups) {
+      for(caseStudy in group) {
+        for(value in caseStudy) {
+          if(abs(value) > maximumValue) {
+            maximumValue <- value
+          }
+        }
+      }
+    }
+    
+    # divide all polys by ma number
+    for(z in 1:length(polynomGroups)) {
+      for(i in 1:length(polynomGroups[[z]])) {
+        vec <- vector()
+        for (j in 1:length(polynomGroups[[z]][[i]])) {
+          vec <- c(vec, polynomGroups[[z]][[i]][j] / maximumValue) 
+        }
+        polynomGroups[[z]][[i]] <- vec
+      }
+    }
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
+    
+    # readd the mean of each of poly to the performance models
+    for(z in 1:length(polynomGroups)) {
+      means <- vector()
+      for(caseStudy in polynomGroups[[z]]) {
+        means <- c(means, mean(caseStudy))
+      }
+      performanceModels[[names(polynomGroups)[z]]] <- means
+    }
+    
     
     if (hasAlternatives) {
       for (i in 1:length(alternativeList)) {
@@ -205,7 +356,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     ggtext(performanceModels, text.font = "sans", text.size=14, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary=pathToLibrary) 
   }
   source(paste(pathOfSourceFiles, "ggradar.R", sep=""))
-  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, legend.text.size=14, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary, alternatives=alternativeList)
+  p <- ggradar(performanceModels, axis.label.size=3, grid.label.size=7, legend.text.size=14, font.radar = "sans", values.radar = c("", "", ""), grid.min = -1, grid.mid = 0, grid.max = 1, pathOfSourceFiles = pathOfSourceFiles, pathToLibrary = pathToLibrary, alternatives=alternativeList, polynoms=polynomGroups)
   ggsave("StarPlot_1.pdf", height=8.5, width=11, p)
   
 }

@@ -25,7 +25,10 @@
 # 20.03.2018: Removed some debug-statements
 # 16.05.2018: Fixed a few bugs and made the first step to handle alternatives
 # 17.05.2018: Inserted pre-processing step
+# 17.05.2018: Dynamic legend width and scaling
 # 22.05.2018: Added box-plot export
+# 17.06.2018: Added violin plots
+# 18.06.2018: Changed order in which points are drawn
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -65,7 +68,8 @@ ggradar <- function(plot.data,
                              line.offset = 0.5,
                              pathOfSourceFiles,
                              pathToLibrary, 
-                             alternatives=NULL) {
+                             alternatives=NULL,
+                             polynoms = NULL) {
 
   library("ggplot2", lib.loc=pathToLibrary)
   # Retrieve the location of the script
@@ -199,7 +203,7 @@ SplitInHalf <- function(vector) {
   return(result);
 }
 
-GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, alternativePlots) {
+GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, alternativePlots, polyPlots) {
   
   # dynmaically scale the text size depending on the number of interactions and textsize of the biggest interaction. Can at lowest be 0.5 of the original size.
   scaleFactor <- 1
@@ -260,7 +264,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
     "\t\\newcommand{\\alternativeHeight}{85px}",
-    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/9,"}"),          ""
+    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/13.2,"}"),          ""
   );
   
   # Create pgf macros for the coordinates
@@ -326,6 +330,37 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   }
       }
     }
+    
+    # Add the polynom violin plots if there are any
+    if (!is.null(polyPlots) && i %in% polyPlots$Column) {
+      indices <- which(i == polyPlots$Column)
+      numberIndices <- length(indices)
+      if (numberIndices == 1) {
+        xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
+                                  "}", sep="");
+        content <- c(content, 
+                     c(
+                       xCoordinateLabel,
+                       yCoordinateLabel
+                     ))
+      } else {
+        for (j in 1:numberIndices) {
+          xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", sep="");
+          yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
+                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}", sep="");
+          content <- c(content, 
+                       c(
+                         xCoordinateLabel,
+                         yCoordinateLabel
+                       ))
+        }
+      }
+    }
+    
+    
   }
   
   content <- c(content, 
@@ -359,6 +394,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                  "\t\\begin{tikzpicture}",
                  paste("\t\t\\node[inner sep=0, anchor=north west] (pic) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep="")
                ));
+  
+  polyIndexCounter <- 1
+  
   for (i in 1:numberLabels) {
     if (i == 1) {
       nodeProp <- "anchor=south"
@@ -384,6 +422,18 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                        paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[j],"}};", sep="")
                       ))
   }
+    }
+    
+    if (!is.null(polyPlots) && i %in% polyPlots$Column) {
+      indices <- which(i == polyPlots$Column)
+      numberIndices <- length(indices)
+      for (j in 1:numberIndices) {
+        content <- c(content, 
+                     c(
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", polyPlots$Plot[polyIndexCounter],"}};", sep="")
+                     ))
+        polyIndexCounter <- polyIndexCounter + 1
+      }
     }
   }
   
@@ -555,6 +605,83 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
      }
   }
   
+  # Create Violin Plots for polynom groups in necessary
+  polyPlots <- NULL
+  polyPlots$Plot <- c()
+  polyPlots$Column <- c()
+  
+  polyCounter <- 0
+  if (!is.null(polynoms) && length(polynoms) > 0) {
+    columnNames <- names(plot.data)
+    for (i in 1:length(polynoms)) {
+      polyNames <- names(polynoms[[i]])
+      for (j in 1:length(polynoms[[i]])) {
+        polyValues <- NULL
+        
+        if (length(polynoms[[i]][[j]]) < 4) {
+          # duplicate vector to be able to make a violing plot
+          vals <- c(polynoms[[i]][[j]], polynoms[[i]][[j]])
+          polyValues$y <- vals
+        } else {
+          polyValues$y <- polynoms[[i]][[j]]
+        }
+        
+        polyValues$x <- rep(1, length(polyValues$y))
+        
+        smallestPoint <- NULL
+        smallestPoint$y <- polynoms[[i]][[j]][1]
+        smallestPoint$x <- 1
+        
+        highestPoint <- NULL
+        highestPoint$y <- polynoms[[i]][[j]][length(polynoms[[i]][[j]])]
+        highestPoint$x <- 1
+        
+        # (1) Find out the respective column
+        columnNumber <- which(names(polynoms)[i] == columnNames)[1] - 1
+        
+        # (2) Retrieve the angle that is left to the next element
+        angleLeft <- (2 * pi) / max(n.vars, 5)
+        
+        # (3) Calculate the offsets
+        currentAngle <- angles[columnNumber]
+        violinPlotOffset <- c(abs(cos(currentAngle)), abs(sin(currentAngle))) / length(polynoms)
+        
+        
+        # (4) Generate the plots and save them as .pdf-files
+        # Add transparent background
+        newPlot <- ggplot() 
+        
+        newPlot <- newPlot + 
+          theme(line = element_blank(),
+                text = element_blank(),
+                axis.text.y=element_blank(),
+                axis.text.x=element_blank(),
+                axis.ticks=element_blank(),
+                panel.background = element_rect(fill="transparent", colour=NA),
+                panel.grid.minor = element_blank(), 
+                panel.grid.major = element_blank(),
+                plot.background = element_rect(fill = "transparent",colour = NA)
+          )
+        
+        
+        newPlot <- newPlot +
+          # Violin plot with sharper edges to cope with sparse data
+          geom_violin(data=as.data.frame(polyValues), aes(x=x, y=y, color=I(colorsVector[j])), lwd=3, adjust=.40) +
+          ylim(-1,1)
+        # add point indicating the smallest values for the variables, abuse that they were calculated in order
+        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=4, shape=4)
+        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=4, shape=10)
+        
+        ggsave(paste("Poly_", polyCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
+        polyPlots$Plot <- c(polyPlots$Plot, paste("Poly_", polyCounter,".pdf", sep=""))
+        polyPlots$Column <- c(polyPlots$Column, columnNumber)
+        
+        polyCounter <- polyCounter + 1
+        
+      }
+    }
+  }
+  
   #print(gridline$min$label)
   #print(gridline$max$label)
   #print(gridline$mid$label)
@@ -639,12 +766,17 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   eqZero <- eqZero[group$path$val == 0,];
   
   # ... + group points (cluster data)
+  # plot points for zeroes first
   for (k in 1:length(unique(group$path$group))) {
     groupName <- unique(group$path$group)[k];
     
     if (nrow(eqZero[eqZero$group == groupName,]) > 0) {
       base <- base + geom_point(data=eqZero[eqZero$group == groupName,],aes(x=x,y=y,group=group,colour=group, fill=I("white")), shape=21, size=group.point.size)  
     }
+  }
+  # plot points for non zeroes second
+  for (k in 1:length(unique(group$path$group))) {
+    groupName <- unique(group$path$group)[k];
     
     if (nrow(nonZero[nonZero$group == groupName,]) > 0) {
       base <- base + geom_point(data=nonZero[nonZero$group == groupName,],aes(x=x,y=y,group=group,colour=group), size=group.point.size)  
@@ -683,7 +815,7 @@ base <- ggplot(axis$label) + xlab(NULL) + ylab(NULL) + coord_equal() +
   #guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
   #theme(text=element_text(family=font.radar)) + 
   #theme(legend.title=element_blank())
-  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1], alternativePlots)
+  GenerateTexFile("StarPlot.tex", "StarPlot_1.pdf", axis$label$text, plot.data[,1], alternativePlots, polyPlots)
 
   return(base)
 
