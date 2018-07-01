@@ -29,6 +29,7 @@
 # 22.05.2018: Added box-plot export
 # 17.06.2018: Added violin plots
 # 18.06.2018: Changed order in which points are drawn
+# 01.07.2018: Refined points for violin plots
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -669,8 +670,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
           geom_violin(data=as.data.frame(polyValues), aes(x=x, y=y, color=I(colorsVector[j])), lwd=3, adjust=.40) +
           ylim(-1,1)
         # add point indicating the smallest values for the variables, abuse that they were calculated in order
-        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=4, shape=4)
-        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=4, shape=10)
+        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=16, shape=4)
+        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=16, shape=1)
         
         ggsave(paste("Poly_", polyCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
         polyPlots$Plot <- c(polyPlots$Plot, paste("Poly_", polyCounter,".pdf", sep=""))

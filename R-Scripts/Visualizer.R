@@ -16,6 +16,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   library("labeling", lib.loc=pathToLibrary)
   library("digest", lib.loc=pathToLibrary)
   #library(ggradar)
+  print(granularity)
   
   suppressPackageStartupMessages(library("dplyr", lib.loc=pathToLibrary))
   library("scales", lib.loc=pathToLibrary)
@@ -98,9 +99,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     names(completeValueRange) <- options
     
     # handle polynominals start
+    polynominals <- list()
     if (granularity == "coarse") {
     # compute polynominals
-    polynominals <- list()
     toIgnore <- vector()
     for(i in 2:length(performanceModels)) {
       poly <- colnames(performanceModels)[i]
@@ -319,6 +320,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
     
     # divide all polys by ma number
+	if (length(polynomGroups > 0)) {
     for(z in 1:length(polynomGroups)) {
       for(i in 1:length(polynomGroups[[z]])) {
         vec <- vector()
@@ -328,6 +330,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         polynomGroups[[z]][[i]] <- vec
       }
     }
+	}
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
     
