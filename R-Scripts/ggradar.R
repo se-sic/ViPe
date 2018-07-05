@@ -25,7 +25,6 @@
 # 20.03.2018: Removed some debug-statements
 # 05.07.2018: Quick fix for scaling bug
 
-
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
                              values.radar = c("0%", "50%", "100%"),                       
