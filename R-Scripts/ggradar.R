@@ -30,6 +30,7 @@
 # 17.06.2018: Added violin plots
 # 18.06.2018: Changed order in which points are drawn
 # 01.07.2018: Refined points for violin plots
+# 02.07.2018: Changed stroke of geom_points at violin plot, bug fixes and refinements
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -223,12 +224,14 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   }
   
   # dynamically scale the radius of the text for large influence models. Radius can at max be 1.5 times of the default value
-  radiusScale <- 1
+
   if (scaleFactor < 1) {
-    radiusScale <- (0.95/scaleFactor)%%(1.5 * 3.3)
+    radiusScale <- (0.90/scaleFactor)%%(1.5 * 3.3)
     if (radiusScale < 1) {
       radiusScale <- 1
     }
+  } else {
+    radiusScale <- 1
   }
   
   # dynamically adjust the width of the legend box
@@ -260,12 +263,13 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
     "",
     "\t\\newcommand{\\centerX}{9.22}",
     "\t\\newcommand{\\centerY}{-7}",
-    paste("\t\\newcommand{\\radius}{",radiusScale*3.3,"}"),
+    #paste("\t\\newcommand{\\radius}{",radiusScale*3.3,"}"),
+    paste("\t\\newcommand{\\radius}{",3.3,"}"),
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
     "\t\\newcommand{\\alternativeHeight}{85px}",
-    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/13.2,"}"),          ""
+    paste("\t\\newcommand{\\legendWidth}{",nchar(normalizedTitle)/18.2,"}"),          ""
   );
   
   # Create pgf macros for the coordinates
@@ -280,8 +284,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   prefixes <- c(letters, LETTERS);
   
   for (i in 1:numberLabels) {
-    xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x{\\centerX + (\\radius + \\lineOffset) * sin(\\angleDiff * ", i - 1, ")", sep="");
-    yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y{\\centerY + (\\radius + \\lineOffset) * cos(\\angleDiff * ", i - 1, ")", sep="");
+    xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x{\\centerX + (\\radius *", radiusScale," + \\lineOffset) * sin(\\angleDiff * ", i - 1, ")", sep="");
+    yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y{\\centerY + (\\radius *", radiusScale," + \\lineOffset) * cos(\\angleDiff * ", i - 1, ")", sep="");
     
     
     if (i == 1) {
@@ -331,7 +335,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   }
       }
     }
-    
+    browser();
     # Add the polynom violin plots if there are any
     if (!is.null(polyPlots) && i %in% polyPlots$Column) {
       indices <- which(i == polyPlots$Column)
@@ -397,6 +401,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                ));
   
   polyIndexCounter <- 1
+  altIndexCounter <- 1
   
   for (i in 1:numberLabels) {
     if (i == 1) {
@@ -408,7 +413,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
     } else {
       nodeProp <- "anchor=east, align=right"
     }
-    
     content <- c(content, 
                  c(
                    paste("\t\t\\node[inner sep=0,scale=", scaleFactor," ,", nodeProp, "] at (\\", prefixes[i], "x, \\", prefixes[i], "y) {$ ", allTerms[i], " $};", sep="")
@@ -420,8 +424,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
       for (j in 1:numberIndices) {
         content <- c(content, 
                      c(
-                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[j],"}};", sep="")
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[altIndexCounter],"}};", sep="")
                       ))
+        altIndexCounter <- altIndexCounter + 1
   }
     }
     
@@ -588,7 +593,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                  plot.background = element_rect(fill = "transparent",colour = NA)
            )
          
-         
          newPlot <- newPlot +
                     # Whiskers
                     stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar', lwd=3) +
@@ -670,8 +674,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
           geom_violin(data=as.data.frame(polyValues), aes(x=x, y=y, color=I(colorsVector[j])), lwd=3, adjust=.40) +
           ylim(-1,1)
         # add point indicating the smallest values for the variables, abuse that they were calculated in order
-        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=16, shape=4)
-        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=16, shape=1)
+        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=24, shape=4, stroke=2)
+        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=24, shape=1, stroke=2)
         
         ggsave(paste("Poly_", polyCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
         polyPlots$Plot <- c(polyPlots$Plot, paste("Poly_", polyCounter,".pdf", sep=""))

@@ -149,10 +149,11 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       }
       polyDf <- data.frame(matrix(unlist(polynom), nrow=length(polyPartNames)))
       TMP <- unlist(performanceModels[["Group"]])
-      rownames(polyDf) <- performanceModels[["Group"]]
-      colnames(polyDf) <- polyPartNames[[1]]
+      colnames(polyDf) <- performanceModels[["Group"]]
+      rownames(polyDf) <- polyPartNames[[1]]
       listOfPolynominals[[i]] = polyDf
     }
+    browser();
     
     # compute all values for each polynominal
     groupNames <- vector()
@@ -160,10 +161,10 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     for (i in 1:length(listOfPolynominals)) {
       groupValues <- list()
       currentPoly <- listOfPolynominals[[i]]
-      uniqueVariables <- unique(unlist(strsplit(colnames(currentPoly)[1], "[*]")))
+      uniqueVariables <- unique(unlist(strsplit(rownames(currentPoly)[1], "[*]")))
       groupNames <- c(groupNames, paste(uniqueVariables, collapse='*', sep="*"))
       # for each case study
-      for (j in 1:nrow(currentPoly)) {
+      for (j in 1:ncol(currentPoly)) {
         
         selectedValues <- vector()
         #compute all possible value combinations
@@ -181,17 +182,18 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
           }
         }
         
+        browser();
         # compute the values of the polynom group
         computedValues <- vector()
         for (val in selectedValues) {
           computedVal <- 0
-          for (z in 1:length(colnames(currentPoly))) {
-            coeff <- currentPoly[j, z]
+          for (z in 1:length(rownames(currentPoly))) {
+            coeff <- currentPoly[[j]][z]
             assignedValues <- unlist(strsplit(val, "[*]"))
             names(assignedValues) <- uniqueVariables
             #neutral value for multiplication
             temp <- 1
-            for (option in unlist(strsplit(colnames(currentPoly)[z], "[*]"))) {
+            for (option in unlist(strsplit(rownames(currentPoly)[z], "[*]"))) {
               temp <- temp * as.numeric(assignedValues[option])
             }
             temp <- temp * coeff
@@ -201,7 +203,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
         groupValues[[length(groupValues) + 1]] <- computedValues
       }
-      names(groupValues) <- rownames(currentPoly)
+      browser();
+      names(groupValues) <- colnames(currentPoly)
       polynomGroups[[length(polynomGroups) + 1]] <- groupValues
     }
     names(polynomGroups) <- groupNames
@@ -264,7 +267,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     # Extract the duplicates
     # TODO: Order?
     duplicates <- allTerms[duplicated(allTerms)]
-    
     if (length(duplicates) == 0) {
       hasAlternatives <- FALSE
     } else {
@@ -292,7 +294,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
           }
         }
       }
-      
       # 4. Remove the columns
       performanceModels <- performanceModels[,-columnsToRemove]
     }
@@ -307,30 +308,43 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
     
   } else {
+    browser();
     # Find the maximum value
     maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
     for(group in polynomGroups) {
       for(caseStudy in group) {
         for(value in caseStudy) {
           if(abs(value) > maximumValue) {
-            maximumValue <- value
+            maximumValue <- abs(value)
           }
         }
       }
     }
     
-    # divide all polys by ma number
-	if (length(polynomGroups > 0)) {
-    for(z in 1:length(polynomGroups)) {
-      for(i in 1:length(polynomGroups[[z]])) {
-        vec <- vector()
-        for (j in 1:length(polynomGroups[[z]][[i]])) {
-          vec <- c(vec, polynomGroups[[z]][[i]][j] / maximumValue) 
+    for(alternative in alternativeList) {
+      for(values in alternative) {
+        for(value in values) {
+          if(abs(value) > maximumValue) {
+            maximumValue <- abs(value)
+          }
         }
-        polynomGroups[[z]][[i]] <- vec
       }
     }
-	}
+    
+    
+    browser();
+    # divide all polys by ma number
+	  if (length(polynomGroups)> 0) {
+      for(z in 1:length(polynomGroups)) {
+        for(i in 1:length(polynomGroups[[z]])) {
+          vec <- vector()
+          for (j in 1:length(polynomGroups[[z]][[i]])) {
+            vec <- c(vec, polynomGroups[[z]][[i]][j] / maximumValue) 
+          }
+          polynomGroups[[z]][[i]] <- vec
+        }
+      }
+	  }
     
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
     
@@ -351,6 +365,7 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
       }
     }
+    browser();
     
   }
   
