@@ -23,6 +23,7 @@
 # 13.02.2018: Improved the legend box and color palette
 # 23.02.2018: Added information from the domain of the variables
 # 20.03.2018: Removed some debug-statements
+# 05.07.2018: Quick fix for scaling bug
 
 
 ggradar <- function(plot.data,
@@ -240,7 +241,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     "",
     "\t\\newcommand{\\centerX}{9.22}",
     "\t\\newcommand{\\centerY}{-7}",
-    paste("\t\\newcommand{\\radius}{",radiusScale*3.3,"}"),
+    paste("\t\\newcommand{\\radius}{3.3}"),
     "\t\\newcommand{\\lineOffset}{0.7}",
     "\t\\newcommand{\\textsize}{\\tiny}",
     "\t\\newcommand{\\offset}{0.2}",
@@ -258,8 +259,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
   prefixes <- c(letters, LETTERS);
   
   for (i in 1:numberLabels) {
-    xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x{\\centerX + (\\radius + \\lineOffset) * sin(\\angleDiff * ", i - 1, ")", sep="");
-    yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y{\\centerY + (\\radius + \\lineOffset) * cos(\\angleDiff * ", i - 1, ")", sep="");
+    xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x{\\centerX + (\\radius *", radiusScale," + \\lineOffset) * sin(\\angleDiff * ", i - 1, ")", sep="");
+    yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y{\\centerY + (\\radius *", radiusScale," + \\lineOffset) * cos(\\angleDiff * ", i - 1, ")", sep="");
     
     
     if (i == 1) {
@@ -367,7 +368,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles) {
     legendContent <- c(legendContent, 
                        "",
                        "\t\t% Draw legend box",
-                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea + \\widthof{",normalizedTitle,"}, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
+                       paste("\t\t\\draw let \\p1=(secondLeftLegendText.south east) in let \\p2=(firstColorLabel.south east) in ($(emptyCircle.north west) + (-\\outerMarginArea, \\spaceBetweenLegendTitleAndLegend)$) rectangle ($(\\x2, \\y1) + (\\outerMarginArea, -\\outerMarginArea - \\spaceBetweenLegendRows *",length(titles) - 2,")$);", sep=""),
                        "")
   } else {
     legendContent <- c(legendContent, 
