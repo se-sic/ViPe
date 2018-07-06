@@ -31,6 +31,8 @@
 # 18.06.2018: Changed order in which points are drawn
 # 01.07.2018: Refined points for violin plots
 # 02.07.2018: Changed stroke of geom_points at violin plot, bug fixes and refinements
+# 05.07.2018: Removed offset of violin plots and boxplots
+# 05.07.2018: Fixed Plot reference for multiple plots
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -226,7 +228,7 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   # dynamically scale the radius of the text for large influence models. Radius can at max be 1.5 times of the default value
 
   if (scaleFactor < 1) {
-    radiusScale <- (0.90/scaleFactor)%%(1.5 * 3.3)
+    radiusScale <- (0.85/scaleFactor)%%(2 * 3.3)
     if (radiusScale < 1) {
       radiusScale <- 1
     }
@@ -324,9 +326,11 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
       } else {
         for (j in 1:numberIndices) {
           xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
-                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", sep="");
+                                  #  " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}",
+                                  "}",sep="");
           yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
-                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}", sep="");
+                                  #  " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}",
+                                  "}",sep="");
           content <- c(content, 
                        c(
                          xCoordinateLabel,
@@ -335,7 +339,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   }
       }
     }
-    browser();
     # Add the polynom violin plots if there are any
     if (!is.null(polyPlots) && i %in% polyPlots$Column) {
       indices <- which(i == polyPlots$Column)
@@ -353,9 +356,11 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
       } else {
         for (j in 1:numberIndices) {
           xCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "x", prefixes[j], "{\\centerX + \\radius * sin(\\angleDiff * ", i - 1, ")",
-                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", sep="");
+                                  #  " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * cos(-\\angleDiff * ", i - 1, ")}", 
+                                  "}",sep="");
           yCoordinateLabel <- paste("\t\\pgfmathsetmacro\\", prefixes[i], "y", prefixes[j], "{\\centerY + \\radius * cos(\\angleDiff * ", i - 1, ")",
-                                    " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}", sep="");
+                                  #  " - (\\distance / 2 - \\distance / ", numberIndices - 1, " * ", j - 1, ") * sin(-\\angleDiff * ", i - 1, ")}",
+                                  "}",sep="");
           content <- c(content, 
                        c(
                          xCoordinateLabel,
@@ -400,9 +405,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
                  paste("\t\t\\node[inner sep=0, anchor=north west] (pic) at (0,0) {\\includegraphics[width=\\picWidth, height=\\picHeight]{", pathToOutputFile,"}};", sep="")
                ));
   
-  polyIndexCounter <- 1
-  altIndexCounter <- 1
-  
   for (i in 1:numberLabels) {
     if (i == 1) {
       nodeProp <- "anchor=south"
@@ -421,22 +423,24 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
     if (!is.null(alternativePlots) && i %in% alternativePlots$Column) {
       indices <- which(i == alternativePlots$Column)
       numberIndices <- length(indices)
+      altIndexCounter <- 1
       for (j in 1:numberIndices) {
         content <- c(content, 
                      c(
-                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[altIndexCounter],"}};", sep="")
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", alternativePlots$Plot[indices[altIndexCounter]],"}};", sep="")
                       ))
         altIndexCounter <- altIndexCounter + 1
   }
     }
     
     if (!is.null(polyPlots) && i %in% polyPlots$Column) {
+      polyIndexCounter <- 1
       indices <- which(i == polyPlots$Column)
       numberIndices <- length(indices)
       for (j in 1:numberIndices) {
         content <- c(content, 
                      c(
-                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", polyPlots$Plot[polyIndexCounter],"}};", sep="")
+                       paste("\t\t\\node[inner sep=0, rotate=-\\angleDiff * ", i - 1, ", anchor=north] at (\\", prefixes[i], "x", prefixes[j], ", \\", prefixes[i], "y", prefixes[j], ") {\\includegraphics[width=15px, height=\\alternativeHeight]{", polyPlots$Plot[indices[polyIndexCounter]],"}};", sep="")
                      ))
         polyIndexCounter <- polyIndexCounter + 1
       }

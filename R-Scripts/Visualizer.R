@@ -153,7 +153,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       rownames(polyDf) <- polyPartNames[[1]]
       listOfPolynominals[[i]] = polyDf
     }
-    browser();
     
     # compute all values for each polynominal
     groupNames <- vector()
@@ -182,7 +181,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
           }
         }
         
-        browser();
         # compute the values of the polynom group
         computedValues <- vector()
         for (val in selectedValues) {
@@ -203,7 +201,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
         groupValues[[length(groupValues) + 1]] <- computedValues
       }
-      browser();
       names(groupValues) <- colnames(currentPoly)
       polynomGroups[[length(polynomGroups) + 1]] <- groupValues
     }
@@ -251,7 +248,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     
   }
   alternativeList<- NULL
-  
   if (hasAlternatives) {
     # 1. Replace the names
     allTerms <- names(performanceModels)[-1]
@@ -289,7 +285,9 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
             for (k in 1:length(indices)) {
               values <- c(values, performanceModels[i, indices[k] + 1])
             }
-            performanceModels[i, indices[k]] <- mean(values)
+            for (index in indices) {
+              performanceModels[i, (index + 1)] <- mean(values)
+            }
             alternativeList[[i]][[currentColumn]] <- values
           }
         }
@@ -308,7 +306,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
     
   } else {
-    browser();
     # Find the maximum value
     maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
     for(group in polynomGroups) {
@@ -332,7 +329,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
     
     
-    browser();
     # divide all polys by ma number
 	  if (length(polynomGroups)> 0) {
       for(z in 1:length(polynomGroups)) {
@@ -365,7 +361,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
       }
     }
-    browser();
     
   }
   
