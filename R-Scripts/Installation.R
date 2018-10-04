@@ -24,6 +24,8 @@ installNeededPackages <- function(path) {
   # Install tibble (as a dependency for dplyr)
   install.packages("tibble", lib=path, repos="https://cran.uni-muenster.de/")
   
+  install.packages("glue", lib=path, repos="https://cran.uni-muenster.de/")
+  install.packages("tidyselect", lib=path, repos="https://cran.uni-muenster.de/")
   install.packages("dplyr", lib=path, repos="https://cran.uni-muenster.de/")
   # library("withr", lib.loc=path)
   # library("httr", lib.loc=path)
