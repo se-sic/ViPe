@@ -80,12 +80,13 @@ DEL *.log
 
 :: print usage function
 :printUsage
-echo "Usage: ./Visualizer.sh -c <PathToDirectoryWithCsvFiles> -l <PathToLibDir> [-r <PathToRscript>] [-v <PathToVD>] [-i] [-g coarse]";
-echo "PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
-echo "PathToLibDir is the path where the libraries should be stored.";
-echo "PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
-echo "PathToVD is the path to the .txt file containing the value domain of each feature (only required if installation has to be performed too). Can either be a valid path, or NONE to indicate that no file exists.";
-echo "-i tells the script whether the installation of the libraries should be performed or not.";
-echo "-g tells the script how fine grained polynomials are displayed. Current either not using the flag - displaying all information- or coarse is supported.";
+echo "Usage: ./Visualizer.sh -c <PathToDirectoryWithCsvFiles> -l <PathToLibDir> [-r <PathToRscript>] [-v <pathToVD>] [-i] [-h] [-g <granularity>]";
+echo "-c: PathToDirectoryWithCsvFiles is the path to the directory containing the performance models as .csv-files.";
+echo "-l: PathToLibDir is the path where the libraries should be stored.";
+echo "-r: PathToRscript is the path to the Rscript.exe file (only needed on Windows) - Default: Rscript";
+echo "-v: PathToVD is the path to the .txt file containing the value domain of each feature.";
+echo "-i:PerformInstallation tells the script whether the installation of the libraries should be performed or not.";
+echo "-h: Print usage.";
+echo "-g: Granularity of the resulting plot. Can either be fine(default) or coarse.";
 
 :end

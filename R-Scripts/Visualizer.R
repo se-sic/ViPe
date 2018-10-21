@@ -16,7 +16,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
   library("labeling", lib.loc=pathToLibrary)
   library("digest", lib.loc=pathToLibrary)
   #library(ggradar)
-  print(granularity)
   
   suppressPackageStartupMessages(library("dplyr", lib.loc=pathToLibrary))
   library("scales", lib.loc=pathToLibrary)
@@ -147,13 +146,16 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         polynom[j] <- performanceModels[tmp]
         performanceModels[tmp] <- NULL
       }
-      polyDf <- data.frame(matrix(unlist(polynom), nrow=length(polyPartNames)))
+      polyDf <- data.frame()
+      if (length(polynom) > 0) {
+      for(x in 1:length(polynom)) {
+        polyDf <- rbind(polyDf, polynom[[x]])
+      }}
       TMP <- unlist(performanceModels[["Group"]])
       colnames(polyDf) <- performanceModels[["Group"]]
       rownames(polyDf) <- polyPartNames[[1]]
       listOfPolynominals[[i]] = polyDf
     }
-    
     # compute all values for each polynominal
     groupNames <- vector()
     #for each polynomGroup for each case study compute all possible values
@@ -235,8 +237,8 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
           performanceModels[[i]][j] <- valueWeight * performanceModels[[i]][j] 
           
         }
-      } else {
-        
+      # avoid weighting if there are no binary options
+      } else if(!is.na(interaction) & !i == 1) {
         valueWeight <- as.numeric(values[interaction])
         for (j in 1:nrow(performanceModels)) {
           
@@ -306,8 +308,11 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
     }
     
   } else {
-    # Find the maximum value
-    maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))
+    # Find the maximum value, only search in this df if there is at least 1 binary 
+    maximumValue <- 0
+    if (length(performanceModels) > 1) {
+      maximumValue <- max(max(performanceModels[-1]), abs(min(performanceModels[-1])))  
+    }
     for(group in polynomGroups) {
       for(caseStudy in group) {
         for(value in caseStudy) {
@@ -328,7 +333,6 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
       }
     }
     
-    
     # divide all polys by ma number
 	  if (length(polynomGroups)> 0) {
       for(z in 1:length(polynomGroups)) {
@@ -341,17 +345,16 @@ visualize <- function(pathToExampleFiles, pathOfSourceFiles, pathToLibrary, doMe
         }
       }
 	  }
-    
     performanceModels[-1] <- performanceModels[-1]  / maximumValue
-    
     # readd the mean of each of poly to the performance models
+    if (length(polynomGroups) > 0) {
     for(z in 1:length(polynomGroups)) {
       means <- vector()
       for(caseStudy in polynomGroups[[z]]) {
         means <- c(means, mean(caseStudy))
       }
       performanceModels[[names(polynomGroups)[z]]] <- means
-    }
+    } }
     
     
     if (hasAlternatives) {

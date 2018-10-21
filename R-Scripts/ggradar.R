@@ -33,6 +33,7 @@
 # 02.07.2018: Changed stroke of geom_points at violin plot, bug fixes and refinements
 # 05.07.2018: Removed offset of violin plots and boxplots
 # 05.07.2018: Fixed Plot reference for multiple plots
+# 20.07.2018: changed size of geom point
 
 ggradar <- function(plot.data,
                              font.radar="Circular Air Light",
@@ -60,7 +61,7 @@ ggradar <- function(plot.data,
                              axis.label.size=8,
                              axis.line.colour="grey",
                              group.line.width=1.5,
-                             group.point.size=6,
+                             group.point.size=5,
                              background.circle.colour="#D7D6D1",
                              background.circle.inner.colour = "indianred1", 
                              background.circle.outer.colour = "green",
@@ -559,7 +560,6 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
   alternativePlots <- NULL
   alternativePlots$Plot <- c()
   alternativePlots$Column <- c()
-  
   alternativeCounter <- 0
   if (!is.null(alternatives)) {
     columnNames <- names(plot.data)
@@ -599,9 +599,9 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
          
          newPlot <- newPlot +
                     # Whiskers
-                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), geom='errorbar', lwd=3) +
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I((colorsVector)[i])), geom='errorbar', lwd=3) +
                     # outlier.shape additionally removes outliers
-                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I(colorsVector[i])), outlier.shape=NA, lwd=3) +
+                    stat_boxplot(data=as.data.frame(alternativeValues), aes(x=x, y=y, color=I((colorsVector)[i])), outlier.shape=NA, lwd=3) +
                     ylim(-1,1)
                     
          ggsave(paste("Alternative_", alternativeCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
@@ -678,8 +678,8 @@ GenerateTexFile <- function(filePath, pathToOutputFile, allTerms, titles, altern
           geom_violin(data=as.data.frame(polyValues), aes(x=x, y=y, color=I(colorsVector[j])), lwd=3, adjust=.40) +
           ylim(-1,1)
         # add point indicating the smallest values for the variables, abuse that they were calculated in order
-        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=24, shape=4, stroke=2)
-        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=24, shape=1, stroke=2)
+        newPlot <- newPlot + geom_point(data=as.data.frame(smallestPoint), aes( x=x, y=y, color=I(colorsVector[j])), size=16, shape=4, stroke=1)
+        newPlot <- newPlot + geom_point(data=as.data.frame(highestPoint), aes(x=x, y=y, color=I(colorsVector[j])), size=16, shape=1, stroke=1)
         
         ggsave(paste("Poly_", polyCounter,".pdf", sep=""), height=8.5, width=4, newPlot)
         polyPlots$Plot <- c(polyPlots$Plot, paste("Poly_", polyCounter,".pdf", sep=""))
